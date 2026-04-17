@@ -41,7 +41,7 @@ T = {
         "disclaimer": "**NOTA METODOLOGICA:** Il modello adotta un approccio conservativo. L'energia viene prodotta tramite mix FER e acquistata tramite CfD per stabilizzare l'OPEX. Esclusi: Acquisizione terreni, permessi burocratici e trasporti stradali.",
         "btn_export": "🚀 Salva Risultati nel Database Centrale (Zapier)", "export_success": "✅ Dati inviati con successo al Database Centrale!", "export_error": "Inserisci il Codice ISTAT prima di inviare.", "input_istat": "Inserisci il Codice ISTAT del Comune (es. 030043):"
     },
-    "eng": {
+    "en": {
         "title": "🚀 H2READY TOOLKIT - Tool 2.6: Technical and financial analysis of green hydrogen production",
         "credits": "This code was developed within the **INTERREG H2Ready** project by **Matteo De Piccoli - APE FVG**",
         "alert_addizionalita": "⚠️ **ADDITIONALITY WARNING (RED III / EU Delegated Act):** From 2030, to be classified as 'Green' (RFNBO), produced hydrogen must respect the principle of **additionality**: the electrolyzer can only use RES energy produced by new unsubsidized plants...",
@@ -60,7 +60,7 @@ T = {
         "disclaimer": "**METHODOLOGICAL NOTE:** The model adopts a conservative approach. Energy is produced via a RES mix and purchased via CfD to stabilize OPEX. Excluded: Land acquisition, permits, and road transport.",
         "btn_export": "🚀 Save Results to Central Database (Zapier)", "export_success": "✅ Data successfully sent to Central Database!", "export_error": "Please enter the ISTAT Code before sending.", "input_istat": "Enter the Municipality ISTAT Code (e.g. 030043):"
     },
-    "slo": {
+    "sl": {
         "title": "🚀 H2READY TOOLKIT - Tool 2.6: Tehnična in finančna analiza proizvodnje zelenega vodika",
         "credits": "To kodo je v okviru projekta **INTERREG H2Ready** razvil **Matteo De Piccoli - APE FVG**",
         "alert_addizionalita": "⚠️ **OPOZORILO O DODATNOSTI (RED III / Delegirani akt EU):** Od leta 2030 mora proizvedeni vodik, da bo razvrščen kot 'zelen' (RFNBO), spoštovati načelo **dodatnosti**: elektrolizer lahko uporablja le energijo OVE, proizvedeno v novih nesubvencioniranih elektrarnah...",
