@@ -17,7 +17,7 @@ LANG = LANG_OPTIONS[lang_choice]
 # ==========================================
 T = {
     "it": {
-        "title": "🚀 H2READY Scouting Tool - Filtro Termodinamico & RED III",
+        "title": "🚀 H2READY TOOLKIT - Tool 2.1: Filtro Termodinamico & RED III",
         "credits": "Questo codice è stato sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - APE FVG**",
         "instructions_title": "📖 ISTRUZIONI E METODOLOGIA (Leggi prima di iniziare)",
         "instructions_text": """
