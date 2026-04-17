@@ -21,7 +21,7 @@ T = {
     "it": {
         "title": "🚗 H2READY TOOLKIT - Tool 2.2: Valutazione sostituzione flotta",
         "subtitle": "Integrazione del database Excel con **curve di proiezione tecnologica** (2024-2035) per un'analisi dinamica del TCO e delle Emissioni LCA.",
-        "credits": "Sviluppato all'interno del progetto [INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready) da **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**",
+        "credits": "Sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - [APE FVG]**",
         "expander_readme": "ℹ️ Leggi Istruzioni, Logiche e Assunzioni del Simulatore",
         "sb_db": "📂 Caricamento Database",
         "sb_mission": "1. Parametri di Missione",
