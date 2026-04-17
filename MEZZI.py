@@ -50,7 +50,7 @@ T = {
         "export_success": "✅ Dati della flotta inviati con successo!",
         "export_error": "Inserisci l'identificativo prima di inviare."
     },
-    "en": {
+    "eng": {
         "title": "🚗 H2READY TOOLKIT - Tool 2.2: Strategic Fleet Simulator",
         "subtitle": "Excel database integration with **technological projection curves** (2024-2035) for dynamic TCO and LCA Emissions analysis.",
         "credits": "Developed within the **INTERREG H2Ready project** by **Matteo De Piccoli - APE FVG**",
@@ -82,7 +82,7 @@ T = {
         "export_success": "✅ Fleet data sent successfully!",
         "export_error": "Please enter the ID before sending."
     },
-    "sl": {
+    "slo": {
         "title": "🚗 H2READY TOOLKIT - Tool 2.2: Strateški simulator voznega parka",
         "subtitle": "Integracija baze podatkov Excel s **krivuljami tehnoloških projekcij** (2024-2035) za dinamično analizo TCO in emisij LCA.",
         "credits": "Razvito v okviru **projekta INTERREG H2Ready**, avtor **Matteo De Piccoli - APE FVG**",
