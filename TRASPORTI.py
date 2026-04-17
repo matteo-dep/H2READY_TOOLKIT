@@ -463,6 +463,7 @@ Ai costi dei mezzi fisici andrà sempre sommata la costruzione dell'infrastruttu
 """)
 
 # --- SEZIONE EXPORT ---
+
 st.divider()
 st.header("🔗 Esportazione Dati")
 istat_comune = st.text_input(_t["input_istat"])
@@ -471,17 +472,26 @@ if st.button(_t["btn_export"]):
     if not istat_comune:
         st.error(_t["export_error"])
     else:
-        payload = {
-            "ID_ISTAT": istat_comune,
-            "T22_N_VEICOLI_ANALIZZATI": n_veicoli,
-            "T22_ESITO_PREVALENTE": esito_finale,
-            "T22_FABBISOGNO_H2_TON_ANNO": round(fabbisogno_tot_ton, 2),
-            "T22_DELTA_TCO_EURO": round(delta_tco_flotta, 0),
-            "T22_EMISSIONI_EVITATE_TCO2": round(evitate, 1)
-        }
+        # LOGICA DI ESPORTAZIONE CONDIZIONATA
+        if esito_finale == "H2":
+            # Se vince l'Idrogeno, compila tutte le colonne
+            payload = {
+                "ID_ISTAT": istat_comune,
+                "T22_N_VEICOLI_ANALIZZATI": n_veicoli,
+                "T22_ESITO_PREVALENTE": "H2",
+                "T22_FABBISOGNO_H2_TON_ANNO": round(fabbisogno_tot_ton, 2),
+                "T22_DELTA_TCO_EURO": round(delta_tco_flotta, 0),
+                "T22_EMISSIONI_EVITATE_TCO2": round(evitate, 1)
+            }
+        else:
+            # Se vince l'Elettrico (BEV), compila SOLO l'esito
+            payload = {
+                "ID_ISTAT": istat_comune,
+                "T22_ESITO_PREVALENTE": "BEV"
+            }
         
-        # INCOLLA QUI IL TUO URL GOOGLE SCRIPT! (Quello che finisce con /exec)
-        GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwpP0x0hBnhOadXA43IieWg9EusAuhaafpyeXpyaStssDd7Qo-jwnuOttAllzz8r5JS/exec"
+        # INCOLLA QUI IL TUO URL GOOGLE SCRIPT (Quello che finisce con /exec)
+        GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwTeQXTjvrTveg9xPT3pSPaIlUrMSeLjmK2jX59hkA/exec"
         
         try:
             headers = {'Content-Type': 'application/json'}
