@@ -164,7 +164,6 @@ st.title("🚀 H2READY Scouting Tool - Filtro Termodinamico & RED III")
 
 with st.expander("📖 ISTRUZIONI E METODOLOGIA (Leggi prima di iniziare)", expanded=True):
     st.markdown("""
-    Questo codice è stato sviluppato all'interno del progetto INTERREG H2Ready da Matteo De Piccoli - APE FVG: per info scrivi a matteo.depiccoli@ape.fvg.it
     ### 1. Come funziona il Tool e i Codici ATECO
     Il motore logico analizza i codici ATECO incrociandoli con la **Direttiva Europea RED III** e con le **leggi della termodinamica**. Non si limita a cercare chi usa genericamente "alte temperature", ma individua dove l'idrogeno è **chimicamente insostituibile** (es. acciaierie DRI, fertilizzanti) e dove invece rappresenta uno spreco energetico rispetto alla diretta elettrificazione.
     
