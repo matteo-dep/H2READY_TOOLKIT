@@ -119,8 +119,12 @@ T = {
 _t = T[LANG]
 
 # --- INTESTAZIONE ---
-st.title(_t["title"])
-st.markdown(_t["subtitle"])
+st.title("🚗 H2READY TOOLKIT - Tool 2.2: Valutazione sostituzione flotta")
+
+# Questa è la riga magica con i link (usiamo HTML per forzare i colori e i link se Markdown fa i capricci)
+st.markdown("Sviluppato all'interno del progetto **[INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready)** da **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**")
+
+st.markdown("Integrazione del database Excel con **curve di proiezione tecnologica** (2024-2035) per un'analisi dinamica del TCO e delle Emissioni LCA.")
 
 # --- FUNZIONE DI PULIZIA DATI ---
 def clean_val(x):
