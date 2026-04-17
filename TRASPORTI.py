@@ -481,7 +481,7 @@ if st.button(_t["btn_export"]):
         }
         
         # INCOLLA QUI IL TUO URL GOOGLE SCRIPT! (Quello che finisce con /exec)
-        GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwTeQXTjvrTveg9xPT3pSPaIlUrMSeLjmK2jX59hkA/exec"
+        GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwpP0x0hBnhOadXA43IieWg9EusAuhaafpyeXpyaStssDd7Qo-jwnuOttAllzz8r5JS/exec"
         
         try:
             headers = {'Content-Type': 'application/json'}
