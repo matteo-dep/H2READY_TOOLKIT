@@ -146,8 +146,8 @@ def calculate_total_score(row):
     
     return round(score, 1)
 
-# --- GENERATORE DI TEMPLATE EXCEL ---
-def generate_template():
+# --- GENERATORE DI TEMPLATE EXCEL (FASE 1) ---
+def generate_template_fase1():
     output = BytesIO()
     cols = [
         "nome azienda", "Codice ateco", "dimensione", "fatturato [M€]", 
@@ -162,7 +162,23 @@ def generate_template():
     ]
     df_temp = pd.DataFrame(example_data, columns=cols)
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df_temp.to_excel(writer, index=False, sheet_name='Template')
+        df_temp.to_excel(writer, index=False, sheet_name='Template_Screening')
+    return output.getvalue()
+
+# --- GENERATORE DI TEMPLATE EXCEL (FASE 2) ---
+def generate_template_fase2():
+    output = BytesIO()
+    cols = [
+        "nome azienda", "dimensione azienda", "codice ateco", "fabbisogno identificato [t/y]"
+    ]
+    example_data = [
+        ["Fertilizzanti FVG S.p.A.", "Grande", "20.15", 4500.5],
+        ["Vetreria Nord S.r.l.", "Grande", "23.13", 1250.0],
+        ["Acciaierie Anomale", "Grande", "24.99.00", 2800.0]
+    ]
+    df_temp = pd.DataFrame(example_data, columns=cols)
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df_temp.to_excel(writer, index=False, sheet_name='Template_Fabbisogni')
     return output.getvalue()
 
 # --- INTERFACCIA ---
@@ -173,36 +189,53 @@ with st.expander("📖 ISTRUZIONI E METODOLOGIA (Leggi prima di iniziare)", expa
     ### 1. Come funziona il Tool e i Codici ATECO
     Il motore logico analizza i codici ATECO incrociandoli con la **Direttiva Europea RED III** e con le **leggi della termodinamica**. Non si limita a cercare chi usa genericamente "alte temperature", ma individua dove l'idrogeno è **chimicamente insostituibile** (es. acciaierie DRI, fertilizzanti) e dove invece rappresenta uno spreco energetico rispetto alla diretta elettrificazione.
     
-    **Nota sui Codici ATECO:** Il tool legge solo le prime 4 cifre del codice (la *Classe*), ignorando le ultime due (che hanno finalità puramente contabili o statistiche). Se inserisci un codice che non fa parte del database prioritario per l'idrogeno, il tool riconoscerà comunque il macro-settore di appartenenza (le prime 2 cifre) ed emetterà un alert chiedendoti di verificare il dato.  
-    ATTENZIONE: Noto il nome dell'azienda con semplici ricerche online è possibile recuperare facilmente la dimensione aziendale, il codice ATECO e il fatturato aziendale.
+    **Nota sui Codici ATECO:** Il tool legge solo le prime 4 cifre del codice (la *Classe*), ignorando le ultime due. ATTENZIONE: Noto il nome dell'azienda con semplici ricerche online è possibile recuperare facilmente la dimensione aziendale, il codice ATECO e il fatturato aziendale.
     
-    ### 2. Compilazione del File (Regola d'Oro)
-    Scarica il template Excel tramite il bottone qui sotto e compilalo. 
-    * 🔴 **Colonne Obbligatorie:** Le prime 3 colonne (`nome azienda`, `Codice ateco`, `dimensione`) sono strettamente obbligatorie per permettere al motore di avviarsi.
-    * 🟢 **Colonne di Approfondimento (Consigliate):** Compilare il resto delle colonne (in particolare `processo`, `note`, `ubicazione`, `AIA`) aggiunge informazioni **fondamentali** per una valutazione approfondita. Il tool legge il testo in "processo" e "note" per recuperare aziende borderline o escludere falsi positivi (es. rilevando le parole "altoforno" o "forno a metano").
-
-    ### 3. Gli Esiti Termodinamici
-    * 🟢 **Assolutamente Necessario:** L'idrogeno è materia prima o Agente Riducente. Nessuna alternativa possibile.
-    * 🟢 **Necessario (Limiti Fisici):** Grandi forni fusori dove la densità di energia impedisce l'elettrificazione massiva.
-    * 🟡 **Opzionale / Competizione:** Settori (Cemento, Calce) in cui l'idrogeno compete a svantaggio con Biometano e CSS.
-    * 🟠 **Alert Elettrificazione:** Trattamenti termici dove tecnologie come l'**induzione elettrica** sono più efficienti dell'H2.
-    * 🔴 **Spreco Termodinamico (Non Idonei):** Produzione di vapore, energia di rete, o data center. L'idrogeno qui è uno spreco.
+    ### 2. FASE 1: Screening Iniziale
+    Scarica il **Template 1 (Screening)** tramite il bottone qui sotto e compilalo. 
+    * 🔴 **Colonne Obbligatorie:** `nome azienda`, `Codice ateco`, `dimensione`.
+    * 🟢 **Colonne di Approfondimento:** Compilare `processo` e `note` permette al tool di intercettare falsi positivi o keyword specifiche (es. "altoforno").
     """)
     
-    template_bin = generate_template()
+    template_bin_1 = generate_template_fase1()
     st.download_button(
-        label="📥 Scarica il Template Excel",
-        data=template_bin, file_name="template_h2ready.xlsx", mime="application/vnd.ms-excel"
+        label="📥 1. Scarica Template Screening (Fase 1)",
+        data=template_bin_1, file_name="template_screening_h2ready.xlsx", mime="application/vnd.ms-excel"
     )
+
+    st.markdown("""
+    ### 3. FASE 2: Mappatura Fabbisogni (Per Action Plan)
+    Una volta identificate le aziende idonee tramite la Fase 1, usa il **Template 2 (Fabbisogni)** per inserire i dati quantitativi. 
+    Questo file è **fondamentale**: i dati caricati in questo formato verranno processati dal sistema centrale (via Zapier) per generare il **Piano d'Azione (Action Plan)** definitivo del Comune.
+    """)
+    
+    template_bin_2 = generate_template_fase2()
+    st.download_button(
+        label="📥 2. Scarica Template Fabbisogni (Fase 2)",
+        data=template_bin_2, file_name="template_fabbisogni_h2ready.xlsx", mime="application/vnd.ms-excel"
+    )
+
+    st.markdown("""
+    ### 4. Gli Esiti Termodinamici
+    * 🟢 **Assolutamente Necessario:** H2 come materia prima o Agente Riducente.
+    * 🟢 **Necessario (Limiti Fisici):** Grandi forni fusori difficili da elettrificare.
+    * 🟡 **Opzionale / Competizione:** Competizione economica con Biometano e CSS.
+    * 🟠 **Alert Elettrificazione:** Tecnologie come l'induzione elettrica sono più efficienti dell'H2.
+    * 🔴 **Spreco Termodinamico:** Produzione di vapore o energia di rete. L'idrogeno qui è uno spreco.
+    """)
 
 st.markdown("---")
 
-# --- CARICAMENTO E DASHBOARD ---
-uploaded_file = st.file_uploader("Carica il database compilato (.xlsx o .csv)", type=["xlsx", "csv"])
+# ==========================================
+# SEZIONE UPLOAD - FASE 1
+# ==========================================
+st.header("📤 FASE 1: Caricamento e Analisi Termodinamica")
+st.write("Carica qui il file di screening per ottenere la valutazione di idoneità delle aziende mappate.")
+uploaded_file_1 = st.file_uploader("Carica il database di screening (.xlsx o .csv)", type=["xlsx", "csv"], key="fase1")
 
-if uploaded_file:
+if uploaded_file_1:
     try:
-        df = pd.read_csv(uploaded_file) if uploaded_file.name.endswith('.csv') else pd.read_excel(uploaded_file)
+        df = pd.read_csv(uploaded_file_1) if uploaded_file_1.name.endswith('.csv') else pd.read_excel(uploaded_file_1)
         df.columns = df.columns.str.strip().str.lower()
         
         # Estrazione dei 3 valori (Base Score, Profilo, Esito Termodinamico)
@@ -278,3 +311,29 @@ if uploaded_file:
 
     except Exception as e:
         st.error(f"Errore: Assicurati che le colonne siano corrette. Dettaglio tecnico: {e}")
+
+# ==========================================
+# SEZIONE UPLOAD - FASE 2 (EXPORT ZAPIER)
+# ==========================================
+st.markdown("---")
+st.header("📤 FASE 2: Consolidamento Fabbisogni (Export per Action Plan)")
+st.info("Carica qui il **Template 2 (Fabbisogni)** compilato con le stime in tonnellate/anno (t/y). Questo modulo estrarrà i dati formattati per l'invio automatico al Database Centrale dei Piani d'Azione.")
+
+uploaded_file_2 = st.file_uploader("Carica il database Fabbisogni (.xlsx o .csv)", type=["xlsx", "csv"], key="fase2")
+
+if uploaded_file_2:
+    try:
+        df2 = pd.read_csv(uploaded_file_2) if uploaded_file_2.name.endswith('.csv') else pd.read_excel(uploaded_file_2)
+        
+        st.success("✅ Dati Fabbisogni validati correttamente! Le informazioni sottostanti sono pronte per generare l'Action Plan.")
+        
+        # Mostra i dati per conferma utente
+        st.dataframe(df2, use_container_width=True, hide_index=True)
+        
+        # Calcolo aggregato veloce
+        if 'fabbisogno identificato [t/y]' in df2.columns:
+            totale_h2 = df2['fabbisogno identificato [t/y]'].sum()
+            st.metric("Fabbisogno Totale Aggregato", f"{totale_h2:,.1f} ton/anno")
+            
+    except Exception as e:
+        st.error(f"Errore nella lettura del file Fabbisogni. Dettaglio tecnico: {e}")
