@@ -8,6 +8,7 @@ st.set_page_config(page_title="H2READY TOOLKIT - Tool 2.1", layout="wide")
 
 # --- INTESTAZIONE E CREDITI ---
 #st.title("📊 H2READY - Scouting Tool")
+st.title("🚀 H2READY Scouting Tool - Filtro Termodinamico & RED III")
 
 # Inserimento crediti e link sotto il titolo
 st.caption("Questo codice è stato sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - APE FVG**")
@@ -182,7 +183,7 @@ def generate_template_fase2():
     return output.getvalue()
 
 # --- INTERFACCIA ---
-st.title("🚀 H2READY Scouting Tool - Filtro Termodinamico & RED III")
+#st.title("🚀 H2READY Scouting Tool - Filtro Termodinamico & RED III")
 
 with st.expander("📖 ISTRUZIONI E METODOLOGIA (Leggi prima di iniziare)", expanded=True):
     st.markdown("""
