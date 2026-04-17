@@ -9,11 +9,17 @@ st.set_page_config(page_title="H2READY - Scouting Tool (Efficienza Termodinamica
 # --- INTESTAZIONE E CREDITI ---
 st.title("📊 H2READY - Scouting Tool")
 
-# Inserimento crediti sotto il titolo
+# Inserimento crediti e link sotto il titolo
 st.caption("Questo codice è stato sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - APE FVG**")
-st.caption("📧 Per info: [matteo.depiccoli@ape.fvg.it](mailto:matteo.depiccoli@ape.fvg.it)")
+st.markdown("""
+    <p style='font-size: 0.8rem; color: gray;'>
+        🌐 Progetto: <a href='https://www.ita-slo.eu/en/h2ready' target='_blank'>Interreg H2Ready</a> | 
+        🏠 Sito Ente: <a href='https://www.ape.fvg.it/' target='_blank'>APE FVG</a> | 
+        📧 Contatto: <a href='mailto:matteo.depiccoli@ape.fvg.it'>matteo.depiccoli@ape.fvg.it</a>
+    </p>
+""", unsafe_allow_html=True)
 
-st.divider() # Una linea sottile per separare i crediti dal corpo del tool
+st.divider()
 
 # --- DIZIONARIO ATECO SPECIFICO (4 Cifre - Hard to Abate e RED III) ---
 ATECO_DESCRIPTIONS = {
