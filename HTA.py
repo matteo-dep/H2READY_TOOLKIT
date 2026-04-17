@@ -4,7 +4,7 @@ import plotly.express as px
 from io import BytesIO
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="H2READY - Scouting Tool (Efficienza Termodinamica)", layout="wide")
+st.set_page_config(page_title="H2READY TOOLKIT - Tool 2.1", layout="wide")
 
 # --- INTESTAZIONE E CREDITI ---
 st.title("📊 H2READY - Scouting Tool")
