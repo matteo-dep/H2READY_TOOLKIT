@@ -8,7 +8,7 @@ import json
 # ==========================================
 # CONFIGURAZIONE PAGINA E LINGUA
 # ==========================================
-st.set_page_config(page_title="DSS Mobilità - Gap Analysis", layout="wide")
+st.set_page_config(page_title="H2READY TOOLKIT - Tool 2.2: Valutazione sostituzione flotta", layout="wide")
 
 LANG_OPTIONS = {"Italiano": "it", "English": "en", "Slovenščina": "sl"}
 lang_choice = st.sidebar.selectbox("🌐 Lingua / Language / Jezik", list(LANG_OPTIONS.keys()))
