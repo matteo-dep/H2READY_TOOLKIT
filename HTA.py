@@ -331,7 +331,7 @@ if st.button("🚀 Salva Risultati nel Database Centrale"):
             }
             
             # 3. Invio a Google (USA LO STESSO URL DEL TOOL 2.6!)
-            GOOGLE_WEBHOOK_URL = "INCOLLA_QUI_IL_TUO_URL_DI_GOOGLE_APPS_SCRIPT"
+            GOOGLE_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwpP0x0hBnhOadXA43IieWg9EusAuhaafpyeXpyaStssDd7Qo-jwnuOttAllzz8r5JS/exec"
             
             headers = {'Content-Type': 'application/json'}
             response = requests.post(
