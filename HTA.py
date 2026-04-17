@@ -8,7 +8,7 @@ st.set_page_config(page_title="H2READY TOOLKIT - Tool 2.1: Scouting aziende HTA 
 
 # --- INTESTAZIONE E CREDITI ---
 #st.title("📊 H2READY - Scouting Tool")
-st.title("🚀 H2READY TOOLKIT - Tool 2.1")
+st.title("🚀 H2READY TOOLKIT - Tool 2.1: Scouting aziende HTA e RED III")
 
 # Inserimento crediti e link sotto il titolo
 st.caption("Questo codice è stato sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - APE FVG**")
