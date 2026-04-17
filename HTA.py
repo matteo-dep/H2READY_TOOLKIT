@@ -3,8 +3,17 @@ import pandas as pd
 import plotly.express as px
 from io import BytesIO
 
-# Configurazione Pagina
+# --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="H2READY - Scouting Tool (Efficienza Termodinamica)", layout="wide")
+
+# --- INTESTAZIONE E CREDITI ---
+st.title("📊 H2READY - Scouting Tool")
+
+# Inserimento crediti sotto il titolo
+st.caption("Questo codice è stato sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - APE FVG**")
+st.caption("📧 Per info: [matteo.depiccoli@ape.fvg.it](mailto:matteo.depiccoli@ape.fvg.it)")
+
+st.divider() # Una linea sottile per separare i crediti dal corpo del tool
 
 # --- DIZIONARIO ATECO SPECIFICO (4 Cifre - Hard to Abate e RED III) ---
 ATECO_DESCRIPTIONS = {
