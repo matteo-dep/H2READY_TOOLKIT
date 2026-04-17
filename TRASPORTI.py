@@ -119,12 +119,23 @@ T = {
 _t = T[LANG]
 
 # --- INTESTAZIONE ---
-st.title("🚗 H2READY TOOLKIT - Tool 2.2: Valutazione sostituzione flotta")
+#st.title("🚗 H2READY TOOLKIT - Tool 2.2: Valutazione sostituzione flotta")
 
 # Questa è la riga magica con i link (usiamo HTML per forzare i colori e i link se Markdown fa i capricci)
-st.markdown("Sviluppato all'interno del progetto **[INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready)** da **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**")
+#st.markdown("Sviluppato all'interno del progetto **[INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready)** da **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**")
 
-st.markdown("Integrazione del database Excel con **curve di proiezione tecnologica** (2024-2035) per un'analisi dinamica del TCO e delle Emissioni LCA.")
+#st.markdown("Integrazione del database Excel con **curve di proiezione tecnologica** (2024-2035) per un'analisi dinamica del TCO e delle Emissioni LCA.")
+
+st.title(_t["title"])
+st.caption(_t["credits"])
+st.markdown("""
+    <p style='font-size: 0.8rem; color: gray;'>
+        🌐 Progetto: <a href='https://www.ita-slo.eu/en/h2ready' target='_blank'>Interreg H2Ready</a> | 
+        🏠 Sito Ente: <a href='https://www.ape.fvg.it/' target='_blank'>APE FVG</a> | 
+        📧 Contatto: <a href='mailto:matteo.depiccoli@ape.fvg.it'>matteo.depiccoli@ape.fvg.it</a>
+    </p>
+""", unsafe_allow_html=True)
+st.divider()
 
 # --- FUNZIONE DI PULIZIA DATI ---
 def clean_val(x):
