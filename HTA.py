@@ -320,7 +320,7 @@ if st.button("🚀 Salva Risultati nel Database Centrale"):
             nomi_aziende = "; ".join(df2.iloc[:, 0].astype(str).tolist())
             
             # Sommiamo la colonna del fabbisogno (sostituisci "Fabbisogno_H2" con il nome reale della tua colonna Excel)
-            totale_h2 = float(df2["Fabbisogno_H2"].sum())
+            totale_h2 = float(df2["T21_FABBISOGNO_H2_TON_ANNO"].sum())
             
             # 2. Creiamo il pacchetto con i nomi ESATTI delle intestazioni
             payload = {
