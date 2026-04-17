@@ -325,7 +325,7 @@ if st.button(_t["btn_export"]):
             "T26_PAYBACK_ANNI": round(payback, 1) if payback < 99 else "N/A"
         }
         
-        ZAPIER_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwTeQXTjvrTveg9xPT3pSPaIlUrMSeLjmK2jX59hkA/dev"
+        ZAPIER_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwpP0x0hBnhOadXA43IieWg9EusAuhaafpyeXpyaStssDd7Qo-jwnuOttAllzz8r5JS/exec"
         
         try:
             response = requests.post(ZAPIER_WEBHOOK_URL, data=json.dumps(payload))
