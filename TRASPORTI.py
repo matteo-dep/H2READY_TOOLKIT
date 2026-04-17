@@ -19,7 +19,7 @@ LANG = LANG_OPTIONS[lang_choice]
 # ==========================================
 T = {
     "it": {
-        "title": "🚗 H2READY: Simulatore Strategico di Flotta",
+        "title": "🚗 H2READY TOOLKIT - Tool 2.2: Valutazione sostituzione flotta",
         "subtitle": "Integrazione del database Excel con **curve di proiezione tecnologica** (2024-2035) per un'analisi dinamica del TCO e delle Emissioni LCA.",
         "credits": "Sviluppato all'interno del progetto **INTERREG H2Ready** da **Matteo De Piccoli - APE FVG**",
         "expander_readme": "ℹ️ Leggi Istruzioni, Logiche e Assunzioni del Simulatore",
@@ -51,7 +51,7 @@ T = {
         "export_error": "Inserisci l'identificativo prima di inviare."
     },
     "en": {
-        "title": "🚗 H2READY: Strategic Fleet Simulator",
+        "title": "🚗 H2READY TOOLKIT - Tool 2.2: Strategic Fleet Simulator",
         "subtitle": "Excel database integration with **technological projection curves** (2024-2035) for dynamic TCO and LCA Emissions analysis.",
         "credits": "Developed within the **INTERREG H2Ready** project by **Matteo De Piccoli - APE FVG**",
         "expander_readme": "ℹ️ Read Instructions, Logic, and Simulator Assumptions",
@@ -83,7 +83,7 @@ T = {
         "export_error": "Please enter the ID before sending."
     },
     "sl": {
-        "title": "🚗 H2READY: Strateški simulator voznega parka",
+        "title": "🚗 H2READY TOOLKIT - Tool 2.2: Strateški simulator voznega parka",
         "subtitle": "Integracija baze podatkov Excel s **krivuljami tehnoloških projekcij** (2024-2035) za dinamično analizo TCO in emisij LCA.",
         "credits": "Razvito v okviru projekta **INTERREG H2Ready**, avtor **Matteo De Piccoli - APE FVG**",
         "expander_readme": "ℹ️ Preberite navodila, logiko in predpostavke simulatorja",
