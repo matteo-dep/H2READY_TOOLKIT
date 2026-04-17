@@ -294,3 +294,58 @@ if uploaded_file_2:
         st.dataframe(df2, use_container_width=True, hide_index=True)
     except Exception as e:
         st.error(f"Errore / Error: {e}")
+
+import requests
+import json
+import streamlit as st
+
+
+st.markdown("---")
+st.header("🔗 Esportazione Dati")
+st.info("Invia i risultati dell'analisi aziende al Master Database.")
+
+istat_comune = st.text_input("Inserisci il Codice ISTAT (o la Partita IVA se non sei un Comune):", 
+                             help="Se stai facendo una prova, usa un codice come TEST-Nome-Data")
+
+# Assumiamo che df2 sia il dataframe filtrato con le aziende Hard-to-Abate
+if st.button("🚀 Salva Risultati nel Database Centrale"):
+    if not istat_comune:
+        st.error("Inserisci l'Identificativo prima di inviare.")
+    else:
+        try:
+            # 1. Calcoliamo le metriche
+            n_aziende = len(df2)
+            
+            # Uniamo i nomi delle aziende con il PUNTO E VIRGOLA
+            nomi_aziende = "; ".join(df2.iloc[:, 0].astype(str).tolist())
+            
+            # Sommiamo la colonna del fabbisogno (sostituisci "Fabbisogno_H2" con il nome reale della tua colonna Excel)
+            totale_h2 = float(df2["Fabbisogno_H2"].sum())
+            
+            # 2. Creiamo il pacchetto con i nomi ESATTI delle intestazioni
+            payload = {
+                "ID_ISTAT": istat_comune,
+                "T21_N_AZIENDE_IDONEE": n_aziende,
+                "T21_NOMI_AZIENDE": nomi_aziende,
+                "T21_FABBISOGNO_H2_TON_ANNO": round(totale_h2, 2)
+            }
+            
+            # 3. Invio a Google (USA LO STESSO URL DEL TOOL 2.6!)
+            GOOGLE_WEBHOOK_URL = "INCOLLA_QUI_IL_TUO_URL_DI_GOOGLE_APPS_SCRIPT"
+            
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(
+                GOOGLE_WEBHOOK_URL, 
+                data=json.dumps(payload), 
+                headers=headers,
+                allow_redirects=True
+            )
+            
+            if response.status_code in [200, 201]:
+                st.success("✅ Dati del Tool 2.1 inviati con successo!")
+                st.balloons()
+            else:
+                st.error(f"Errore Google (Codice {response.status_code}).")
+                
+        except Exception as e:
+            st.error(f"Errore durante l'elaborazione o l'invio: {e}")
