@@ -46,7 +46,7 @@ T = {
         "gap_title": "💰 Strategia Incentivi & Gap Analysis",
         "macro_title": "🏢 F. Analisi Macro: Transizione Flotta Intera",
         "btn_export": "🚀 Salva Risultati nel Database Centrale",
-        "input_istat": "Inserisci il Codice ISTAT del Comune (es. 030043):",
+        "input_istat": "Inserisci il CODICE IDENTIFICATIVO del progetto:",
         "export_success": "✅ Dati della flotta inviati con successo!",
         "export_error": "Inserisci l'identificativo prima di inviare."
     },
