@@ -39,7 +39,7 @@ T = {
         "fin_title": "💶 Analisi Finanziaria e Ripartizione CAPEX", "fin_lcoh": "LCOH (Costo H2)", "fin_capex": "CAPEX Investimento", "fin_payback": "Tempo di Rientro", "fin_rev": "Ricavi Annuali",
         "pie_title": "**Scomposizione Investimento Iniziale (CAPEX)**", "tab_title": "**Dettaglio Analitico Costi**",
         "disclaimer": "**NOTA METODOLOGICA:** Il modello adotta un approccio conservativo. L'energia viene prodotta tramite mix FER e acquistata tramite CfD per stabilizzare l'OPEX. Esclusi: Acquisizione terreni, permessi burocratici e trasporti stradali.",
-        "btn_export": "🚀 Salva Risultati nel Database Centrale (Zapier)", "export_success": "✅ Dati inviati con successo al Database Centrale!", "export_error": "Inserisci il Codice ISTAT prima di inviare.", "input_istat": "Inserisci il Codice ISTAT del Comune (es. 030043):"
+        "btn_export": "🚀 Salva Risultati nel Database Centrale (Zapier)", "export_success": "✅ Dati inviati con successo al Database Centrale!", "export_error": "Inserisci il CODICE IDENTIFICATIVO prima di inviare.", "input_istat": "Inserisci il CODICE IDENTIFICATIVO:"
     },
     "en": {
         "title": "🚀 H2READY TOOLKIT - Tool 2.6: Technical and financial analysis of green hydrogen production",
