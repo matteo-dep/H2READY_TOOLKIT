@@ -192,11 +192,12 @@ def generate_template_fase2():
     return output.getvalue()
 
 # ==========================================
-# 3. INTERFACCIA E LOGICA
+# 3. INTERFACCIA E ISTRUZIONI
 # ==========================================
-
 with st.expander(_t["instr_title"], expanded=True):
-    st.write("Segui la Fase 1 per lo screening e la Fase 2 per quantificare i fabbisogni.")
+    # Questa riga "magica" stampa tutto il papiro di istruzioni dettagliate (Step 1, 2, 3)
+    st.markdown(_t["instructions_md"])
+    
     st.download_button(_t["btn_template1"], generate_template_fase1(), "template_screening.xlsx")
     st.download_button(_t["btn_template2"], generate_template_fase2(), "template_fabbisogni.xlsx")
 
