@@ -20,7 +20,25 @@ T = {
     "it": {
         "title": "🚀 H2READY TOOLKIT - Tool 2.1: Scouting aziende HTA e RED III",
         "credits": "Sviluppato all'interno del progetto [INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready) da **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**",
-        "instr_title": "📖 ISTRUZIONI E METODOLOGIA",
+        "instr_title": "📖 GUIDA PER I COMUNI (Leggi prima di iniziare)",
+        "instructions_md": """
+### 🎯 Qual è il tuo obiettivo?
+Come referente del Comune o Ente Pubblico, il tuo compito è **mappare le industrie del tuo territorio** per capire quali hanno *reale* necessità di passare all'idrogeno verde (es. acciaierie, vetrerie, chimica) e quali invece dovrebbero solo usare più energia elettrica. Non serve essere un ingegnere, il sistema farà i calcoli per te.
+
+**Segui questi 3 passaggi:**
+
+**🟢 FASE 1: Mappatura iniziale (Screening)**
+1. Scarica il **Template 1** tramite il bottone qui sotto.
+2. Inserisci i dati anagrafici base delle industrie locali (basta Nome, Codice ATECO e Dimensione). 
+3. Carica il file completato nella sezione "FASE 1". Il simulatore applicherà un filtro termodinamico e ti restituirà l'elenco delle sole aziende "Idonee".
+
+**🟡 FASE 2: Raccolta dei Fabbisogni**
+1. Ora che sai chi sono le aziende idonee, contattale o stima il loro potenziale fabbisogno di idrogeno (in Tonnellate all'anno).
+2. Scarica il **Template 2**, compila le tonnellate e carica il file nella "FASE 2".
+
+**🔵 FASE 3: Invio al Master Database**
+Una volta validato il file della Fase 2, inserisci il tuo **Codice ISTAT** in fondo alla pagina e clicca "Salva". I dati verranno usati per creare il Piano d'Azione (Action Plan) generale.
+        """,
         "btn_template1": "📥 1. Scarica Template Screening (Fase 1)",
         "btn_template2": "📥 2. Scarica Template Fabbisogni (Fase 2)",
         "header_fase1": "📤 FASE 1: Caricamento e Analisi Termodinamica",
@@ -32,7 +50,25 @@ T = {
     "en": {
         "title": "🚀 H2READY TOOLKIT - Tool 2.1: HTA and RED III Company Scouting",
         "credits": "Developed within the [INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready) project by **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**",
-        "instr_title": "📖 INSTRUCTIONS AND METHODOLOGY",
+        "instr_title": "📖 GUIDE FOR MUNICIPALITIES (Read before starting)",
+        "instructions_md": """
+### 🎯 What is your goal?
+As a representative of the Municipality or Public Body, your task is to **map the industries in your area** to understand which ones have a *real* need to switch to green hydrogen (e.g., steelworks, glassworks, chemicals) and which ones should simply electrify. You don't need to be an engineer; the system does the math for you.
+
+**Follow these 3 steps:**
+
+**🟢 PHASE 1: Initial Mapping (Screening)**
+1. Download **Template 1** using the button below.
+2. Enter the basic master data of local industries (just Name, NACE Code, and Size). 
+3. Upload the completed file in the "PHASE 1" section. The simulator will apply a thermodynamic filter and give you a list of only the "Eligible" companies.
+
+**🟡 PHASE 2: Needs Consolidation**
+1. Now that you know the eligible companies, contact them or estimate their potential hydrogen needs (in Tons per year).
+2. Download **Template 2**, fill in the tonnage, and upload the file in "PHASE 2".
+
+**🔵 PHASE 3: Send to Master Database**
+Once the Phase 2 file is validated, enter your **ISTAT/Municipality Code** at the bottom of the page and click "Save". The data will be used to create the general Action Plan.
+        """,
         "btn_template1": "📥 1. Download Screening Template (Phase 1)",
         "btn_template2": "📥 2. Download Needs Template (Phase 2)",
         "header_fase1": "📤 PHASE 1: Upload and Thermodynamic Analysis",
@@ -44,7 +80,25 @@ T = {
     "sl": {
         "title": "🚀 H2READY TOOLKIT - Orodje 2.1: Iskanje podjetij HTA in RED III",
         "credits": "Razvito v okviru projekta [INTERREG H2Ready](https://www.ita-slo.eu/en/h2ready), avtor **Matteo De Piccoli - [APE FVG](https://www.ape.fvg.it/)**",
-        "instr_title": "📖 NAVODILA IN METODOLOGIJA",
+        "instr_title": "📖 VODNIK ZA OBČINE (Preberite pred začetkom)",
+        "instructions_md": """
+### 🎯 Kakšen je vaš cilj?
+Kot predstavnik občine ali javnega organa je vaša naloga **kartiranje industrij na vašem območju**, da ugotovite, katere imajo *resnično* potrebo po prehodu na zeleni vodik (npr. jeklarne, steklarne, kemična industrija) in katere bi morale preprosto uporabljati več električne energije. Ni vam treba biti inženir, sistem bo izračunal namesto vas.
+
+**Sledite tem 3 korakom:**
+
+**🟢 1. FAZA: Začetno kartiranje (Pregled)**
+1. Prenesite **Predlogo 1** s spodnjim gumbom.
+2. Vnesite osnovne podatke o lokalnih industrijah (samo Ime, Kodo ATECO/NACE in Velikost). 
+3. Naložite izpolnjeno datoteko v razdelku "1. FAZA". Simulator bo uporabil termodinamični filter in vam vrnil seznam samo "Ustreznih" podjetij.
+
+**🟡 2. FAZA: Zbiranje potreb**
+1. Zdaj, ko poznate ustrezna podjetja, stopite v stik z njimi ali ocenite njihove potencialne potrebe po vodiku (v tonah na leto).
+2. Prenesite **Predlogo 2**, vnesite tonažo in naložite datoteko v "2. FAZI".
+
+**🔵 3. FAZA: Pošiljanje v glavno bazo podatkov**
+Ko je datoteka 2. faze potrjena, na dnu strani vnesite svojo **Kodo občine (ISTAT)** in kliknite "Shrani". Podatki bodo uporabljeni za ustvarjanje splošnega Akcijskega načrta (Action Plan).
+        """,
         "btn_template1": "📥 1. Prenesi predlogo za pregled (1. faza)",
         "btn_template2": "📥 2. Prenesi predlogo za potrebe (2. faza)",
         "header_fase1": "📤 1. FAZA: Nalaganje in termodinamična analiza",
