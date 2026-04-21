@@ -123,11 +123,24 @@ st.divider()
 # ==========================================
 # 3. ISTRUZIONI INIZIALI
 # ==========================================
+# ==========================================
+# 3. ISTRUZIONI E LOGICA (MENU A TENDINA)
+# ==========================================
 with st.expander(_t["instr_title"], expanded=True):
+    # 1. Stampa le istruzioni operative (i 3 step) dal dizionario
     st.markdown(_t["instructions_md"])
+    
+    st.markdown("---") # Riga separatrice
+    
+    # 2. Carica la spiegazione del funzionamento (Logica) dal file .md
+    nome_file_logica = f"logic_HTA_{LANG}.md"
+    if os.path.exists(nome_file_logica):
+        with open(nome_file_logica, "r", encoding="utf-8") as f:
+            st.markdown(f.read())
+    else:
+        st.caption(f"ℹ️ File di logica ({nome_file_logica}) non trovato nella cartella.")
 
 st.markdown("---")
-
 # --- FUNZIONI DI SUPPORTO ---
 def generate_template_fase1():
     output = BytesIO()
