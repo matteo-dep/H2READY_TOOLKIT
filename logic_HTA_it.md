@@ -1,1 +1,10 @@
-vdzdv
+TRANSIZIONE ENERGETICA: Numeri oltre le opinioni
+
+Mercoledì scorso, nel secondo webinar "Oltre il prezzo: quali sono i costi dell'energia?", abbiamo approfondito la fattibilità della transizione energetica attraverso tre simulatori basati su dati reali e proiezioni finanziarie.
+
+Abbiamo visto l'influenza del fattore geografico: la copertura del "carico di base" con rinnovabili moderne e batterie varia drasticamente in base al luogo. In Puglia, l’autarchia rinnovabile è già economica. A Milano, la scarsità di vento e sole imporrebbe un sovradimensionamento degli impianti tale da triplicare i costi, producendo immensi sprechi di energia in eccesso. La cosa interessante è che in ogni caso si possono coprire più dell' 80% dei consumi domestici con un impianto fotovoltaico accoppiato a batterie se ben dimensionato!
+
+Con un altro tool abbiamo invece approfondito i concetti legati alla bancabilità e i mercati per quanto riguarda le varie tecnologie di produzione energetica con un approccio totalmente trasversale: si è visto come il mercato propenda per le rinnovabili a causa dei brevi di installazione (1-2 anni) e rendimenti certi (circa 14%). Al contrario, l'orizzonte temporale di un reattore EPR (12+ anni) e l'impatto dei tassi di interesse (WACC) rendono il nucleare un investimento poco attrattivo per i capitali privati in un regime di libero mercato.
+
+Infine, abbiamo valutato una potenziale possibilità per la copertura della domanda residua in uno scenario di transizione spinta con l’idrogeno verde. Il tool evidenzia le costrizioni termodinamiche e un limite di efficienza netto: servono 55 kWh elettrici per ottenere 1 kg di idrogeno (pari a 33 kWh termici). Sommati ai costi di stoccaggio e compressione (500-700 bar), l'idrogeno appare come una soluzione inevitabile per i settori "hard-to-abate" (acciaierie, chimica), ma energeticamente insostenibile per consumi altrtimenti elettrificabili.
+In sintesi: il pragmatismo suggerisce di concentrare i capitali su tecnologie mature e finanziariamente sostenibili oggi. Accelerare su rinnovabili e batterie rimane la strada più rapida per una decarbonizzazione efficace in tempi utili.
