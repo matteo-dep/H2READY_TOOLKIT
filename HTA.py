@@ -356,70 +356,293 @@ def describe_code(code4, lang):
     return {"it": "Codice non riconosciuto", "en": "Unrecognised code", "sl": "Neprepoznana koda"}[lang], False
 
 def get_base_score(code4, testo_tecnico, lang):
-    """Logica termodinamica + RED III. Ritorna (score_base, esito_text)."""
+    """Logica termodinamica + RED III. Ritorna (score_base, esito_text, family)."""
     esiti = T[lang]["esiti"]
     prefix = code4[:2]
     tt = testo_tecnico.lower()
 
-    # 1. SPRECO TERMODINAMICO (Score 0)
-    if prefix in ['35', '38', '41', '42', '43'] or code4.startswith('63') \
-       or code4 == '2011' or code4 == '2013' or code4 == '1910':
-        return 0, esiti["spreco"]
+    # 1. SPRECO TERMODINAMICO (Score 0) - famiglie distinte per descrizione
+    if code4 == '2011':
+        return 0, esiti["spreco"], "smr"
+    if code4 in ['2013', '1910']:
+        return 0, esiti["spreco"], "byproduct"
+    if prefix in ['35', '38', '41', '42', '43'] or code4.startswith('63'):
+        return 0, esiti["spreco"], "energy_waste"
 
     # 2. ASSOLUTAMENTE NECESSARIO (Feedstock / agente riducente)
     if code4 in ['2015', '2014'] or code4 == '1920':
         if any(k in tt for k in ['etilen', 'ethylen', 'plastic', 'plastik']):
-            return 0, esiti["spreco"]  # H2 di scarto da steam cracking
-        return 5, esiti["assoluto"]
+            return 0, esiti["spreco"], "cracking"  # H2 di scarto da steam cracking
+        return 5, esiti["assoluto"], "feedstock"
     if code4 == '2410' and any(k in tt for k in ['dri', 'riduzione diretta', 'direct reduction', 'neposredna redukcija']):
-        return 5, esiti["assoluto"]
+        return 5, esiti["assoluto"], "dri"
 
     # 3. NECESSARIO PER LIMITI FISICI (Vetro)
     if code4 in ['2311', '2313']:
-        return 4.5, esiti["limiti"]
+        return 4.5, esiti["limiti"], "glass"
 
     # 4. OPZIONALE / COMPETIZIONE (Calcinazione)
     if code4 in ['2351', '2352', '2320', '2332']:
-        return 3, esiti["opzionale"]
+        return 3, esiti["opzionale"], "calcination"
 
     # 5. ALERT ELETTRIFICAZIONE (Trattamenti termici / metallurgia)
     if code4 in ['2431', '2550', '2561', '2562'] or prefix == '24':
-        return 2, esiti["alert"]
+        return 2, esiti["alert"], "heattreat"
 
     # 6. Processo termico borderline (parole chiave)
     parole_chiave = ['metano', 'methane', 'metan', 'mw', 'forno', 'furnace', 'peč',
                      'fusione', 'melting', 'litje', 'calore', 'heat', 'toplota', 'ossidazione', 'oxidation']
     if any(k in tt for k in parole_chiave) and prefix in ['25', '26', '27', '28', '33']:
-        return 1.5, esiti["alert"]
+        return 1.5, esiti["alert"], "borderline"
 
-    return 0, esiti["non_class"]
+    return 0, esiti["non_class"], "none"
+
+
+def _row_get(row, *keys):
+    cols = {c.lower(): c for c in row.index}
+    for k in keys:
+        for cl, orig in cols.items():
+            if k in cl:
+                return str(row.get(orig, "")).strip()
+    return ""
+
 
 def calculate_total_score(base, row, lang):
-    """Applica i moltiplicatori dimensione + bonus (AIA/IED, zona industriale, corridoio)."""
+    """Versione compatibile: ritorna solo il punteggio totale."""
+    total, _, _ = score_breakdown(base, row, lang)
+    return total
+
+
+def score_breakdown(base, row, lang):
+    """Ritorna (totale, moltiplicatore_dimensione, lista_bonus[(testo, punti)])."""
     if base == 0:
-        return 0
-    cols = {c.lower(): c for c in row.index}
+        return 0, 1.0, []
+    dim = _row_get(row, 'dimen', 'size', 'velikost').lower()
+    if dim in ['grande', 'large', 'velika']:
+        mult, dim_lbl = 1.5, {"it": "Grande", "en": "Large", "sl": "Velika"}[lang]
+    elif dim in ['media', 'medium', 'srednja']:
+        mult, dim_lbl = 1.2, {"it": "Media", "en": "Medium", "sl": "Srednja"}[lang]
+    else:
+        mult, dim_lbl = 1.0, {"it": "Piccola", "en": "Small", "sl": "Mala"}[lang]
 
-    def get(*keys):
-        for k in keys:
-            for cl, orig in cols.items():
-                if k in cl:
-                    return str(row.get(orig, "")).strip().lower()
-        return ""
-
-    dim = get('dimen', 'size', 'velikost')
-    mult = 1.5 if dim in ['grande', 'large', 'velika'] else (1.2 if dim in ['media', 'medium', 'srednja'] else 1.0)
     score = base * mult
-
     yes_words = ['sì', 'si', 'yes', 'y', 'da']
-    if get('aia', 'ied') in yes_words:
+    L = {
+        "it": {"dim": f"Dimensione {dim_lbl} ×{mult}", "aia": "AIA", "zi": "Zona industriale", "corr": "South H2 Corridor"},
+        "en": {"dim": f"Size {dim_lbl} ×{mult}", "aia": "IED", "zi": "Industrial zone", "corr": "South H2 Corridor"},
+        "sl": {"dim": f"Velikost {dim_lbl} ×{mult}", "aia": "IED", "zi": "Industrijska cona", "corr": "South H2 Corridor"},
+    }[lang]
+    bonuses = [(L["dim"], None)]
+    if _row_get(row, 'aia', 'ied').lower() in yes_words:
         score += 2
-    ubic = get('ubic', 'locat', 'lokac')
+        bonuses.append((L["aia"], 2))
+    ubic = _row_get(row, 'ubic', 'locat', 'lokac').lower()
     if "z.i." in ubic or ubic in yes_words:
         score += 3
-    if get('south') in yes_words:
+        bonuses.append((L["zi"], 3))
+    if _row_get(row, 'south').lower() in yes_words:
         score += 3
-    return round(score, 1)
+        bonuses.append((L["corr"], 3))
+    return round(score, 1), mult, bonuses
+
+
+# ==========================================
+# 4b. BASE DI CONOSCENZA PER LA VESTE GRAFICA
+# ==========================================
+# Temperatura di picco rappresentativa (°C) per codice -> alimenta la barra di calore
+TEMP_PEAK = {
+    '1910': 1100, '1920': 500, '2011': 700, '2012': 1000, '2013': 500, '2014': 1100,
+    '2015': 700, '2016': 1100, '2311': 1500, '2313': 1500, '2320': 1600, '2332': 1200,
+    '2351': 1500, '2352': 1200, '2410': 1600, '2431': 1000, '2442': 660, '2443': 1200,
+    '2444': 1200, '2451': 1400, '2452': 1600, '2453': 1650, '2550': 1200, '2561': 1100,
+    '2562': 500, '3511': 1200, '3530': 500, '3821': 1100, '3822': 1200, '3832': 1500,
+}
+
+# Livelli (spettro di necessità) -> colore + etichetta per lingua
+TIER_META = {
+    "absolute":  {"color": "#0B6E4F", "it": "Assoluto",   "en": "Absolute",   "sl": "Nujno"},
+    "necessary": {"color": "#1C7C8C", "it": "Necessario", "en": "Necessary",  "sl": "Potrebno"},
+    "optional":  {"color": "#C98A1B", "it": "Opzionale",  "en": "Optional",   "sl": "Neobvezno"},
+    "alert":     {"color": "#D4622A", "it": "Alert",      "en": "Alert",      "sl": "Opozorilo"},
+    "waste":     {"color": "#A33B4A", "it": "Spreco",     "en": "Waste",      "sl": "Odpadek"},
+}
+FAMILY_TO_TIER = {
+    "feedstock": "absolute", "dri": "absolute", "glass": "necessary",
+    "calcination": "optional", "heattreat": "alert", "borderline": "alert",
+    "cracking": "waste", "smr": "waste", "byproduct": "waste",
+    "energy_waste": "waste", "none": "waste",
+}
+
+# Descrizione approfondita del processo (processo + temperature + ruolo H2)
+PROCESS_DETAIL = {
+    "feedstock": {
+        "it": "L'idrogeno entra come materia prima chimica: sintesi dell'ammoniaca (Haber-Bosch, ~450-500°C e 150-300 bar) o idrotrattamento in raffineria. La molecola serve alla reazione, non al calore: non è sostituibile da elettricità e la decarbonizzazione passa obbligatoriamente da H2 verde (obbligo RED III).",
+        "en": "Hydrogen enters as a chemical feedstock: ammonia synthesis (Haber-Bosch, ~450-500°C and 150-300 bar) or refinery hydrotreating. The molecule serves the reaction, not the heat: it cannot be replaced by electricity, so decarbonisation necessarily goes through green H2 (RED III obligation).",
+        "sl": "Vodik vstopa kot kemična surovina: sinteza amonijaka (Haber-Bosch, ~450-500°C in 150-300 bar) ali rafinerijska hidroobdelava. Molekula je potrebna za reakcijo, ne za toploto: ni je mogoče nadomestiti z elektriko, zato razogljičenje nujno poteka prek zelenega H2 (obveznost RED III).",
+    },
+    "dri": {
+        "it": "Nella riduzione diretta (DRI) l'idrogeno sostituisce il carbonio come agente riducente del minerale di ferro a ~800-1100°C, con acqua come unico sottoprodotto al posto della CO₂. È la via principale per l'acciaio primario a zero emissioni e non ha alternative elettriche dirette.",
+        "en": "In direct reduction (DRI) hydrogen replaces carbon as the reducing agent of iron ore at ~800-1100°C, with water as the only by-product instead of CO₂. It is the main route to zero-emission primary steel and has no direct electric alternative.",
+        "sl": "Pri neposredni redukciji (DRI) vodik nadomesti ogljik kot reducent železove rude pri ~800-1100°C, pri čemer je edini stranski produkt voda namesto CO₂. To je glavna pot do primarnega jekla brez emisij in nima neposredne električne alternative.",
+    },
+    "glass": {
+        "it": "I forni fusori del vetro lavorano in continuo a ~1450-1550°C. Sopra le ~80 t/giorno l'elettrificazione totale è limitata dalla durata degli elettrodi e dalla densità di potenza, perciò l'idrogeno (o un ibrido elettrico-H2) resta tecnicamente necessario nei grandi impianti.",
+        "en": "Glass melting furnaces run continuously at ~1450-1550°C. Above ~80 t/day, full electrification is limited by electrode lifetime and power density, so hydrogen (or an electric-H2 hybrid) remains technically necessary in large plants.",
+        "sl": "Talilne peči za steklo delujejo neprekinjeno pri ~1450-1550°C. Nad ~80 t/dan je popolna elektrifikacija omejena z življenjsko dobo elektrod in gostoto moči, zato vodik (ali hibrid elektrika-H2) ostaja tehnično potreben v velikih obratih.",
+    },
+    "calcination": {
+        "it": "Cemento, calce e refrattari richiedono calcinazione ad alta temperatura (~900-1500°C). L'idrogeno è utilizzabile ma compete economicamente con biometano, CSS e cattura della CO₂; inoltre gran parte delle emissioni è 'di processo' (decomposizione del carbonato) e non si elimina cambiando solo il combustibile.",
+        "en": "Cement, lime and refractories require high-temperature calcination (~900-1500°C). Hydrogen is usable but competes economically with biomethane, SRF and CO₂ capture; moreover, much of the emissions are 'process' emissions (carbonate decomposition) that are not removed by changing fuel alone.",
+        "sl": "Cement, apno in ognjevzdržni izdelki zahtevajo visokotemperaturno kalcinacijo (~900-1500°C). Vodik je uporaben, a ekonomsko tekmuje z biometanom, SRF in zajemom CO₂; poleg tega je velik del emisij 'procesnih' (razpad karbonata), ki jih z zamenjavo goriva ni mogoče odpraviti.",
+    },
+    "heattreat": {
+        "it": "Trattamenti termici, fucinatura e rivestimenti metallici operano tipicamente a ~500-1200°C. Spesso i forni a induzione o a resistenza elettrica sono più efficienti dell'H2; l'idrogeno si giustifica solo dove serve un'atmosfera chimica specifica (tempra, ricottura brillante) o per fusioni secondarie difficili da elettrificare.",
+        "en": "Heat treatments, forging and metal coating typically run at ~500-1200°C. Induction or electric-resistance furnaces are often more efficient than H2; hydrogen is justified only where a specific chemical atmosphere is needed (quenching, bright annealing) or for secondary melting hard to electrify.",
+        "sl": "Toplotne obdelave, kovanje in prevlekanje kovin običajno potekajo pri ~500-1200°C. Indukcijske ali uporovne električne peči so pogosto učinkovitejše od H2; vodik je upravičen le, kjer je potrebna specifična kemična atmosfera (kaljenje, svetlo žarjenje) ali za sekundarno taljenje, ki ga je težko elektrificirati.",
+    },
+    "borderline": {
+        "it": "Processo termico generico a media temperatura in un settore non prioritario. Va verificato caso per caso: nella maggior parte delle situazioni l'elettrificazione diretta (pompe di calore industriali, resistenze, induzione) è preferibile all'idrogeno.",
+        "en": "Generic medium-temperature thermal process in a non-priority sector. To be checked case by case: in most situations direct electrification (industrial heat pumps, resistances, induction) is preferable to hydrogen.",
+        "sl": "Splošen srednjetemperaturni toplotni proces v neprednostnem sektorju. Preveriti je treba za vsak primer posebej: v večini primerov je neposredna elektrifikacija (industrijske toplotne črpalke, upori, indukcija) boljša od vodika.",
+    },
+    "smr": {
+        "it": "Lo steam methane reforming produce idrogeno 'grigio' dal metano emettendo CO₂. Come fonte va sostituito con l'elettrolisi: non è un consumatore da convertire, ma un impianto da decarbonizzare a monte.",
+        "en": "Steam methane reforming produces 'grey' hydrogen from methane while emitting CO₂. As a source it must be replaced by electrolysis: it is not a consumer to convert, but a plant to decarbonise upstream.",
+        "sl": "Parno reformiranje metana proizvaja 'sivi' vodik iz metana ob izpustih CO₂. Kot vir ga je treba nadomestiti z elektrolizo: ni porabnik za pretvorbo, ampak obrat za razogljičenje na izvoru.",
+    },
+    "byproduct": {
+        "it": "Qui l'idrogeno è un sottoprodotto industriale (cloro-soda, cokeria). Spesso è già recuperato in loco e, secondo la RED III, non conta ai fini delle quote di idrogeno rinnovabile: non rappresenta un fabbisogno da pianificare.",
+        "en": "Here hydrogen is an industrial by-product (chlor-alkali, coke ovens). It is often already recovered on site and, under RED III, does not count towards renewable hydrogen quotas: it is not a need to plan for.",
+        "sl": "Tu je vodik industrijski stranski produkt (klor-alkalni proces, koksarne). Pogosto je že lokalno predelan in po RED III ne šteje v kvote obnovljivega vodika: ni potreba, ki bi jo bilo treba načrtovati.",
+    },
+    "cracking": {
+        "it": "Lo steam cracking per etilene/plastica genera idrogeno come sottoprodotto. Non è un fabbisogno: è H2 di scarto, escluso dalle quote RED III. L'azienda è scartata nonostante il codice potenzialmente idoneo.",
+        "en": "Steam cracking for ethylene/plastics generates hydrogen as a by-product. It is not a need: it is waste H2, excluded from RED III quotas. The company is discarded despite the potentially eligible code.",
+        "sl": "Parni kreking za etilen/plastiko proizvaja vodik kot stranski produkt. To ni potreba: gre za odpadni H2, izključen iz kvot RED III. Podjetje je izločeno kljub potencialno ustrezni kodi.",
+    },
+    "energy_waste": {
+        "it": "Produzione di vapore/elettricità, edilizia e data center richiedono calore a bassa temperatura o sola elettricità. Bruciare idrogeno qui è uno spreco termodinamico: pompe di calore, biomasse o elettrificazione diretta sono nettamente più efficienti.",
+        "en": "Steam/electricity production, construction and data centers need low-temperature heat or electricity only. Burning hydrogen here is a thermodynamic waste: heat pumps, biomass or direct electrification are far more efficient.",
+        "sl": "Proizvodnja pare/elektrike, gradbeništvo in podatkovni centri potrebujejo nizkotemperaturno toploto ali zgolj elektriko. Sežig vodika je tu termodinamični odpadek: toplotne črpalke, biomasa ali neposredna elektrifikacija so veliko učinkovitejše.",
+    },
+    "none": {
+        "it": "Codice non prioritario per l'idrogeno o processo a bassa temperatura facilmente elettrificabile. Verifica il codice e la descrizione del processo prima di escludere definitivamente l'azienda.",
+        "en": "Code not prioritised for hydrogen, or low-temperature process easily electrifiable. Verify the code and the process description before definitively discarding the company.",
+        "sl": "Koda ni prednostna za vodik ali nizkotemperaturni proces, ki ga je enostavno elektrificirati. Pred dokončno izločitvijo podjetja preverite kodo in opis procesa.",
+    },
+}
+
+# Testi UI delle schede
+CARD_TXT = {
+    "it": {"score": "Punteggio H2", "temp": "Temperatura di processo", "bonus": "Fattori applicati",
+           "table": "📋 Mostra tabella completa dei dati", "no_temp": "Temperatura non in database",
+           "dist": "Distribuzione esiti"},
+    "en": {"score": "H2 score", "temp": "Process temperature", "bonus": "Applied factors",
+           "table": "📋 Show full data table", "no_temp": "Temperature not in database",
+           "dist": "Verdict distribution"},
+    "sl": {"score": "Ocena H2", "temp": "Temperatura procesa", "bonus": "Uporabljeni dejavniki",
+           "table": "📋 Pokaži celotno tabelo", "no_temp": "Temperatura ni v bazi",
+           "dist": "Porazdelitev ocen"},
+}
+
+CARD_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+.h2-wrap { margin: 4px 0 8px 0; }
+.h2-strip { display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 18px 0; }
+.h2-pill { display:flex; align-items:center; gap:8px; padding:7px 13px; border-radius:999px;
+           background:#F4F6F8; border:1px solid #E6E9ED; font-size:0.82rem; color:#33404D; }
+.h2-pill b { font-family:'Space Grotesk',sans-serif; font-size:1.0rem; }
+.h2-dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
+.h2c { position:relative; background:#FFFFFF; border:1px solid #E6E9ED; border-left-width:6px;
+       border-radius:12px; padding:16px 18px 14px 18px; margin-bottom:14px;
+       box-shadow:0 1px 2px rgba(16,24,40,.04); }
+.h2c-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.h2c-name { font-weight:700; font-size:1.06rem; color:#1A2430; line-height:1.25; }
+.h2c-badge { flex:0 0 auto; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.72rem;
+             letter-spacing:.06em; text-transform:uppercase; color:#fff; padding:4px 11px; border-radius:7px; }
+.h2c-sub { margin-top:3px; font-size:.86rem; color:#5A6B7B; }
+.h2c-sub .code { font-family:'Space Grotesk',sans-serif; font-weight:700; color:#2A3744; }
+.h2c-mid { display:flex; align-items:center; gap:18px; margin:13px 0 11px 0; flex-wrap:wrap; }
+.h2c-score { display:flex; align-items:baseline; gap:7px; flex:0 0 auto; }
+.h2c-score .num { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:2.0rem; line-height:1; }
+.h2c-score .lbl { font-size:.74rem; color:#8595A4; text-transform:uppercase; letter-spacing:.04em; }
+.h2c-heat { flex:1 1 240px; min-width:200px; }
+.h2c-heat .cap { font-size:.72rem; color:#8595A4; margin-bottom:5px; display:flex; justify-content:space-between; }
+.h2c-heat .cap b { font-family:'Space Grotesk',sans-serif; color:#33404D; }
+.h2c-bar { position:relative; height:9px; border-radius:6px;
+           background:linear-gradient(90deg,#2D6CB6 0%,#49A0C4 18%,#E8B04B 50%,#E2722B 73%,#9E2B2B 100%); }
+.h2c-mark { position:absolute; top:-4px; width:3px; height:17px; border-radius:2px;
+            background:#11202E; box-shadow:0 0 0 2px #fff; }
+.h2c-ticks { display:flex; justify-content:space-between; font-size:.62rem; color:#A9B4BF; margin-top:3px; }
+.h2c-detail { font-size:.9rem; color:#3C4A57; line-height:1.5; margin:2px 0 11px 0; }
+.h2c-verdict { font-size:.86rem; color:#2A3744; background:#F6F8FA; border-radius:8px; padding:8px 11px; margin-bottom:10px; }
+.h2c-bonus { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.h2c-bonus .k { font-size:.68rem; color:#9AA6B2; text-transform:uppercase; letter-spacing:.05em; margin-right:2px; }
+.h2c-chip { font-size:.74rem; padding:3px 9px; border-radius:6px; background:#EEF2F5; color:#3C4A57; border:1px solid #E2E7EB; }
+.h2c-chip.plus { background:#EAF5EF; color:#0B6E4F; border-color:#CDE8DB; }
+@media (max-width:640px){ .h2c-mid{ gap:12px; } }
+</style>
+"""
+
+
+def _heat_bar_html(code4, lang):
+    temp = TEMP_PEAK.get(code4)
+    if temp is None:
+        return f'<div class="h2c-heat"><div class="cap"><span>{CARD_TXT[lang]["temp"]}</span>' \
+               f'<span>{CARD_TXT[lang]["no_temp"]}</span></div>' \
+               f'<div class="h2c-bar" style="opacity:.25"></div></div>'
+    pct = max(2, min(98, temp / 1700 * 100))
+    return (
+        f'<div class="h2c-heat">'
+        f'<div class="cap"><span>{CARD_TXT[lang]["temp"]}</span><b>≈ {temp}\u00B0C</b></div>'
+        f'<div class="h2c-bar"><div class="h2c-mark" style="left:{pct:.1f}%"></div></div>'
+        f'<div class="h2c-ticks"><span>0\u00B0C</span><span>850\u00B0C</span><span>1700\u00B0C</span></div>'
+        f'</div>'
+    )
+
+
+def render_company_card(item, lang):
+    tier = item["tier"]
+    color = TIER_META[tier]["color"]
+    tier_label = TIER_META[tier][lang]
+    bonus_chips = ""
+    for txt, pts in item["bonuses"]:
+        cls = "h2c-chip plus" if pts else "h2c-chip"
+        label = f"{txt} +{pts}" if pts else txt
+        bonus_chips += f'<span class="{cls}">{label}</span>'
+    detail = PROCESS_DETAIL.get(item["family"], {}).get(lang, "")
+    return (
+        f'<div class="h2c" style="border-left-color:{color}">'
+        f'  <div class="h2c-top">'
+        f'    <div class="h2c-name">{item["name"]}</div>'
+        f'    <div class="h2c-badge" style="background:{color}">{tier_label}</div>'
+        f'  </div>'
+        f'  <div class="h2c-sub"><span class="code">{item["classif"]} {item["code4"]}</span> &middot; {item["desc"]}</div>'
+        f'  <div class="h2c-mid">'
+        f'    <div class="h2c-score"><span class="num" style="color:{color}">{item["total"]:g}</span>'
+        f'      <span class="lbl">{CARD_TXT[lang]["score"]}</span></div>'
+        f'    {_heat_bar_html(item["code4"], lang)}'
+        f'  </div>'
+        f'  <div class="h2c-detail">{detail}</div>'
+        f'  <div class="h2c-verdict">{item["esito"]}</div>'
+        f'  <div class="h2c-bonus"><span class="k">{CARD_TXT[lang]["bonus"]}</span>{bonus_chips}</div>'
+        f'</div>'
+    )
+
+
+def render_summary_strip(results, lang):
+    order = ["absolute", "necessary", "optional", "alert", "waste"]
+    counts = {t: 0 for t in order}
+    for r in results:
+        counts[r["tier"]] += 1
+    pills = ""
+    for t in order:
+        if counts[t] == 0:
+            continue
+        pills += (f'<div class="h2-pill"><span class="h2-dot" style="background:{TIER_META[t]["color"]}"></span>'
+                  f'<b>{counts[t]}</b>&nbsp;{TIER_META[t][lang]}</div>')
+    return f'<div class="h2-wrap"><div class="h2-strip">{pills}</div></div>'
 
 # ==========================================
 # 5. INTESTAZIONE E CREDITI
@@ -722,25 +945,34 @@ if uploaded_file_1:
         if code_col is None:
             st.error(f"❌ Colonna codice ({CLASSIF_NAME[LANG]}) non trovata nel file.")
         else:
-            # Individua colonne testuali per le parole chiave di processo
             proc_cols = [c for c in df1.columns if any(k in c.lower() for k in ['process', 'proces', 'not', 'opomb'])]
+            name_col = next((c for c in df1.columns if any(k in c.lower() for k in ['azienda', 'company', 'podjet'])), df1.columns[0])
 
-            descrizioni, scores, esiti_out, codici_fuori_db = [], [], [], []
+            results, codici_fuori_db = [], []
+            descrizioni, scores, esiti_out = [], [], []
             for _, row in df1.iterrows():
                 code4 = normalize_code(row.get(code_col, ""))
                 testo = " ".join(str(row.get(c, "")) for c in proc_cols)
                 desc, in_db = describe_code(code4, LANG)
-                base, esito = get_base_score(code4, testo, LANG)
-                total = calculate_total_score(base, row, LANG)
-                descrizioni.append(desc)
-                esiti_out.append(esito)
-                scores.append(total)
+                base, esito, family = get_base_score(code4, testo, LANG)
+                total, mult, bonuses = score_breakdown(base, row, LANG)
+                descrizioni.append(desc); esiti_out.append(esito); scores.append(total)
                 if not in_db and code4:
                     codici_fuori_db.append(code4)
+                results.append({
+                    "name": str(row.get(name_col, "—")), "code4": code4 or "—",
+                    "classif": CLASSIF_NAME[LANG], "desc": desc, "esito": esito,
+                    "family": family, "tier": FAMILY_TO_TIER[family],
+                    "base": base, "total": total, "mult": mult, "bonuses": bonuses,
+                })
 
             df1[_t["col_desc"]] = descrizioni
             df1[_t["col_score"]] = scores
             df1[_t["col_verdict"]] = esiti_out
+
+            # Ordinamento per livello (tier) e poi punteggio
+            tier_rank = {"absolute": 0, "necessary": 1, "optional": 2, "alert": 3, "waste": 4}
+            results.sort(key=lambda x: (tier_rank[x["tier"]], -x["total"]))
 
             st.success("✅ File Fase 1 analizzato!")
             c1, c2 = st.columns(2)
@@ -750,7 +982,16 @@ if uploaded_file_1:
             if codici_fuori_db:
                 st.warning(_t["alert_codes"] + ", ".join(sorted(set(codici_fuori_db))))
 
-            st.dataframe(df1.sort_values(_t["col_score"], ascending=False), use_container_width=True)
+            # --- VESTE GRAFICA: strip riassuntiva + schede ---
+            st.markdown(CARD_CSS, unsafe_allow_html=True)
+            st.markdown(f"**{CARD_TXT[LANG]['dist']}**")
+            st.markdown(render_summary_strip(results, LANG), unsafe_allow_html=True)
+            cards_html = "".join(render_company_card(it, LANG) for it in results)
+            st.markdown(f'<div class="h2-wrap">{cards_html}</div>', unsafe_allow_html=True)
+
+            # --- Tabella completa (a scomparsa) ---
+            with st.expander(CARD_TXT[LANG]["table"]):
+                st.dataframe(df1.sort_values(_t["col_score"], ascending=False), use_container_width=True)
     except Exception as e:
         st.error(f"Errore: {e}")
 
