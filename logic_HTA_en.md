@@ -1,9 +1,50 @@
-🧠 Operation Logic and Scoring
+## ⚙️ How the assessment engine reasons
 
-The simulator operates through a multi-criteria evaluation process to identify industries with the highest priority for green hydrogen transition, based on three pillars:
+The tool does not simply look for companies that "use high temperatures". It crosses the **NACE code** with the **European RED III Directive** and the **laws of thermodynamics** to identify where hydrogen is *chemically irreplaceable* and where it would instead be a waste compared to direct electrification.
 
-Process Analysis (RED III and Thermodynamics): The system analyzes the first four digits of the NACE code. Sectors where hydrogen acts as a chemical feedstock or a reducing agent — such as in fertilizer production or DRI-cycle steelmaking — receive the maximum score. High priority is also assigned to processes where direct electrification faces physical limits due to extreme temperatures, such as in large continuous glass melting furnaces.
+> **Guiding principle:** hydrogen *only* where electrification is not otherwise possible.
 
-Electrification Alert: For "Tier 2" sectors, such as metal heat treatments or calcination, the code signals a medium priority. In these cases, the simulator suggests evaluating electric technologies (such as induction furnaces or high-temperature heat pumps) which are often more efficient than using hydrogen.
+---
 
-Logistical and Administrative Parameters: The final score is refined by integrating size and geographical data. Large companies, those subject to Integrated Environmental Authorization (IEA), or those positioned near strategic infrastructure (such as the South H2 Corridor) obtain incremental bonuses, thus defining the actual feasibility of the Action Plan.
+### 🔢 Reading the code (4 digits)
+
+The engine reads **only the first 4 digits** of the code (the *Class*), removing dots and ignoring the trailing digits, which serve purely statistical purposes.
+
+- Example: `24.10` → `2410` (Steel)
+- If the code is not in the H2 priority database, the tool falls back to the **macro-sector** (first 2 digits) and raises an **alert** asking you to verify the data.
+
+---
+
+### 🚦 Thermodynamic verdicts
+
+| Verdict | Meaning | Typical examples |
+| :--- | :--- | :--- |
+| 🟢 **Absolutely Necessary** | H2 as feedstock or reducing agent. No alternative. | Fertilizers/ammonia, organic chemicals, DRI steel |
+| 🟢 **Necessary (physical limits)** | Large melting furnaces where energy density prevents mass electrification. | Flat and hollow glass |
+| 🟡 **Optional / Competition** | Sectors where hydrogen competes at a disadvantage with Biomethane and SRF. | Cement, lime, refractories, bricks |
+| 🟠 **Electrification Alert** | Heat treatments where induction or electric furnaces are more efficient than H2. | Cold drawing, forging, coating, general metallurgy |
+| 🔴 **Thermodynamic Waste** | Steam/energy production, construction, data centers, by-product H2. | Steam, grid power, SMR, coke ovens |
+
+---
+
+### 🧮 Score calculation
+
+Multipliers and bonuses are applied to the sector base score:
+
+1. **Company size**
+   - Large → ×1.5
+   - Medium → ×1.2
+   - Small → ×1.0
+2. **Enabling bonuses** (additive)
+   - IED permit present → **+2**
+   - Located in Industrial Zone / consortium → **+3**
+   - Proximity to the South H2 Corridor → **+3**
+
+A high score indicates a priority candidate for a hydrogen action plan.
+
+---
+
+### 📝 Filling in the file (golden rule)
+
+- **Mandatory:** `company name`, `nace code`, `size`.
+- **Recommended:** `process`, `notes`, `location`, `IED`. The tool reads the text in *process* and *notes* to recover borderline companies (e.g. words like "DRI", "furnace", "melting") or to exclude false positives (e.g. by-product H2 from steam cracking).
