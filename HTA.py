@@ -4,6 +4,10 @@ from io import BytesIO
 import requests
 import json
 import os
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.worksheet.datavalidation import DataValidation
+from openpyxl.utils import get_column_letter
 
 # ==========================================
 # 1. CONFIGURAZIONE PAGINA E LINGUA
@@ -364,7 +368,7 @@ def get_base_score(code4, testo_tecnico, lang):
 
     # 2. ASSOLUTAMENTE NECESSARIO (Feedstock / agente riducente)
     if code4 in ['2015', '2014'] or code4 == '1920':
-        if any(k in tt for k in ['etilene', 'ethylene', 'plastica', 'plastic', 'plastika']):
+        if any(k in tt for k in ['etilen', 'ethylen', 'plastic', 'plastik']):
             return 0, esiti["spreco"]  # H2 di scarto da steam cracking
         return 5, esiti["assoluto"]
     if code4 == '2410' and any(k in tt for k in ['dri', 'riduzione diretta', 'direct reduction', 'neposredna redukcija']):
@@ -451,23 +455,257 @@ st.markdown("---")
 # ==========================================
 # 7. GENERATORI DI TEMPLATE (colonne dinamiche per lingua)
 # ==========================================
-def generate_template_fase1(lang):
+# Righe d'esempio (language-neutral): coprono tutti i rami del motore di scoring.
+# Formato: (nome, codice, taglia[L/M/S], fatturato, dipendenti, ubicazione, south, aia, energia, row_id)
+EXAMPLE_ROWS = [
+    ("Ferriere Isontine S.p.A.",       "24.10.00", "L", 320, 540, "Z.I. Aussa-Corno",   True,  True,  210000, "r1"),
+    ("NitroFert FVG S.r.l.",           "20.15",    "L", 260, 410, "Z.I. Torviscosa",     True,  True,  175000, "r2"),
+    ("Raffineria Adriatica S.p.A.",    "19.20",    "L", 900, 700, "Porto di Monfalcone", True,  True,  480000, "r3"),
+    ("PetrolChimica Nord S.p.A.",      "20.14",    "L", 540, 620, "Z.I. Trieste",        False, True,  300000, "r4"),
+    ("Vetreria Giuliana S.r.l.",       "23.11",    "L", 110, 230, "Z.I. Ronchi",         True,  False, 62000,  "r5"),
+    ("Bottiglieria Carso S.p.A.",      "23.13",    "M", 70,  150, "Sgonico",             False, False, 38000,  "r6"),
+    ("Cementi del Friuli S.p.A.",      "23.51",    "L", 180, 290, "Fanna",               False, True,  240000, "r7"),
+    ("Calce e Dolomie Carnia S.r.l.",  "23.52",    "M", 45,  90,  "Tolmezzo",            False, False, 55000,  "r8"),
+    ("Trafilerie Pordenonesi S.r.l.",  "24.31",    "M", 60,  130, "Z.I. Pordenone",      False, True,  28000,  "r9"),
+    ("Metalli Speciali Tarvisio S.p.A.","24.44",   "M", 85,  160, "Z.I. Tarvisio",       True,  False, 41000,  "r10"),
+    ("Acciaierie EAF Bassa S.p.A.",    "24.10.00", "L", 410, 600, "Z.I. Cervignano",     False, True,  260000, "r11"),
+    ("TermoVapore Servizi S.r.l.",     "35.30",    "M", 40,  75,  "Udine",               False, False, 90000,  "r12"),
+    ("DataNord Cloud S.p.A.",          "63.11",    "L", 150, 95,  "Z.I. Amaro",          False, False, 120000, "r13"),
+    ("GasTecnici Industriali S.p.A.",  "20.11",    "L", 130, 180, "Z.I. Aussa-Corno",    True,  True,  140000, "r14"),
+    ("MicroElettronica Maniago S.r.l.","26.01",    "S", 12,  35,  "Z.I. Maniago",        False, False, 4200,   "r15"),
+]
+
+# Valori categorici tradotti (devono combaciare con la logica di scoring)
+SIZE_LABEL = {"it": {"L": "Grande", "M": "Media", "S": "Piccola"},
+              "en": {"L": "Large", "M": "Medium", "S": "Small"},
+              "sl": {"L": "Velika", "M": "Srednja", "S": "Mala"}}
+YESNO = {"it": {True: "Sì", False: "No"},
+         "en": {True: "Yes", False: "No"},
+         "sl": {True: "Da", False: "Ne"}}
+
+# Testo colonna "processo" per riga e lingua (le parole chiave sono multilingua)
+PROC_TEXT = {
+    "r1":  {"it": "Acciaio primario - Ciclo DRI a idrogeno", "en": "Primary steel - hydrogen DRI cycle", "sl": "Primarno jeklo - vodikov cikel DRI"},
+    "r2":  {"it": "Sintesi ammoniaca / fertilizzanti azotati", "en": "Ammonia synthesis / nitrogen fertilizers", "sl": "Sinteza amonijaka / dušikova gnojila"},
+    "r3":  {"it": "Idrodesolforazione e hydrocracking", "en": "Hydrodesulfurization and hydrocracking", "sl": "Hidrorazžveplanje in hidrokreking"},
+    "r4":  {"it": "Steam cracking per etilene e plastica", "en": "Steam cracking for ethylene and plastics", "sl": "Parni kreking za etilen in plastiko"},
+    "r5":  {"it": "Forni fusori continui vetro piano >100 t/g", "en": "Continuous flat glass melting furnaces >100 t/d", "sl": "Kontinuirne talilne peči za ravno steklo >100 t/dan"},
+    "r6":  {"it": "Forno fusorio vetro cavo", "en": "Hollow glass melting furnace", "sl": "Talilna peč za votlo steklo"},
+    "r7":  {"it": "Forno rotativo clinker - calcinazione", "en": "Rotary kiln clinker - calcination", "sl": "Rotacijska peč za klinker - kalcinacija"},
+    "r8":  {"it": "Calcinazione calcare in forni verticali", "en": "Limestone calcination in vertical kilns", "sl": "Kalcinacija apnenca v vertikalnih pečeh"},
+    "r9":  {"it": "Trafilatura a freddo e ricottura", "en": "Cold drawing and annealing", "sl": "Hladno vlečenje in žarjenje"},
+    "r10": {"it": "Fusione metalli non ferrosi", "en": "Non-ferrous metal melting", "sl": "Taljenje neželeznih kovin"},
+    "r11": {"it": "Forno elettrico ad arco (EAF) da rottame", "en": "Electric arc furnace (EAF) from scrap", "sl": "Elektroobločna peč (EAF) iz odpadkov"},
+    "r12": {"it": "Produzione e distribuzione vapore industriale", "en": "Industrial steam production and distribution", "sl": "Proizvodnja in distribucija industrijske pare"},
+    "r13": {"it": "Data center - raffreddamento e UPS", "en": "Data center - cooling and UPS", "sl": "Podatkovni center - hlajenje in UPS"},
+    "r14": {"it": "Produzione gas industriali via SMR", "en": "Industrial gas production via SMR", "sl": "Proizvodnja industrijskih plinov prek SMR"},
+    "r15": {"it": "Saldatura e forno di reflow", "en": "Welding and reflow furnace", "sl": "Varjenje in reflow peč"},
+}
+
+# Testo colonna "note": qui indica l'esito atteso di ogni riga d'esempio
+NOTE_TEXT = {
+    "r1":  {"it": "Assoluto: H2 agente riducente", "en": "Absolute: H2 reducing agent", "sl": "Nujno: H2 kot reducent"},
+    "r2":  {"it": "Assoluto: H2 feedstock RED III", "en": "Absolute: H2 feedstock RED III", "sl": "Nujno: H2 surovina RED III"},
+    "r3":  {"it": "Assoluto: H2 di processo", "en": "Absolute: process H2", "sl": "Nujno: procesni H2"},
+    "r4":  {"it": "Spreco: H2 di scarto (esclusione)", "en": "Waste: by-product H2 (exclusion)", "sl": "Odpadek: stranski H2 (izključitev)"},
+    "r5":  {"it": "Limiti fisici: difficile elettrificare", "en": "Physical limits: hard to electrify", "sl": "Fizične omejitve: težko elektrificirati"},
+    "r6":  {"it": "Limiti fisici", "en": "Physical limits", "sl": "Fizične omejitve"},
+    "r7":  {"it": "Opzionale: compete con CSS/biometano", "en": "Optional: competes with SRF/biomethane", "sl": "Neobvezno: konkurenca SRF/biometan"},
+    "r8":  {"it": "Opzionale", "en": "Optional", "sl": "Neobvezno"},
+    "r9":  {"it": "Alert: valutare induzione elettrica", "en": "Alert: consider electric induction", "sl": "Opozorilo: razmislite o elektriki/indukciji"},
+    "r10": {"it": "Alert: metallurgia generica (prefix 24)", "en": "Alert: generic metallurgy (prefix 24)", "sl": "Opozorilo: splošna metalurgija (predpona 24)"},
+    "r11": {"it": "Alert: forno EAF, metallurgia prefix 24", "en": "Alert: EAF furnace, metallurgy prefix 24", "sl": "Opozorilo: peč EAF, metalurgija predpona 24"},
+    "r12": {"it": "Spreco: elettrificare/biomasse", "en": "Waste: electrify/biomass", "sl": "Odpadek: elektrifikacija/biomasa"},
+    "r13": {"it": "Spreco: elettricità pura", "en": "Waste: pure electricity", "sl": "Odpadek: čista elektrika"},
+    "r14": {"it": "Spreco come input: SMR da sostituire", "en": "Waste as input: SMR to be replaced", "sl": "Odpadek kot vhod: SMR za zamenjavo"},
+    "r15": {"it": "Codice fuori DB + parola termica -> verifica", "en": "Code outside DB + thermal keyword -> verify", "sl": "Koda izven baze + toplotna beseda -> preveri"},
+}
+
+# Testi del foglio Legenda
+LEGEND = {
+    "it": {
+        "head": ["Colonna", "Valori ammessi / Note"],
+        "rows": [
+            ("nome azienda", "Testo libero (obbligatorio)"),
+            ("codice", "Codice ATECO/NACE/SKD. Il tool legge solo le prime 4 cifre (es. 24.10.00 -> 2410). Obbligatorio."),
+            ("dimensione", "Piccola / Media / Grande  (moltiplicatore ×1,0 / ×1,2 / ×1,5). Obbligatorio."),
+            ("fatturato [M€]", "Numero (facoltativo)"),
+            ("dipendenti", "Numero (facoltativo)"),
+            ("ubicazione/consorzio", "Se contiene 'Z.I.' o = Sì -> bonus +3"),
+            ("vicinanza South H2 corridor", "Sì / No  (Sì -> bonus +3)"),
+            ("AIA (si/no)", "Sì / No  (Sì -> bonus +2)"),
+            ("consumo energia [MWh]", "Numero (facoltativo)"),
+            ("processo", "Testo libero: parole come 'DRI', 'forno', 'fusione' aiutano la classificazione"),
+            ("note", "Testo libero. In questo template indica l'esito atteso di ogni riga d'esempio"),
+        ],
+        "head2": ["Esito", "Significato"],
+        "rows2": [
+            ("🟢 Assolutamente necessario", "H2 come materia prima / agente riducente (2015, 2014, 1920, 2410+DRI)"),
+            ("🟢 Necessario (limiti fisici)", "Grandi forni fusori vetro (2311, 2313)"),
+            ("🟡 Opzionale", "Cemento/calce/refrattari/laterizi (2351, 2352, 2320, 2332)"),
+            ("🟠 Alert elettrificazione", "Trattamenti termici e metallurgia (2431, 2550, 2561, 2562, prefix 24)"),
+            ("🔴 Spreco termodinamico", "Vapore/energia, edilizia, data center, H2 di scarto (35, 38, 41-43, 63, 2011, 2013, 1910)"),
+        ],
+    },
+    "en": {
+        "head": ["Column", "Allowed values / Notes"],
+        "rows": [
+            ("company name", "Free text (mandatory)"),
+            ("code", "ATECO/NACE/SKD code. The tool reads only the first 4 digits (e.g. 24.10 -> 2410). Mandatory."),
+            ("size", "Small / Medium / Large  (multiplier ×1.0 / ×1.2 / ×1.5). Mandatory."),
+            ("turnover [M€]", "Number (optional)"),
+            ("employees", "Number (optional)"),
+            ("location/consortium", "If it contains 'Z.I.' or = Yes -> bonus +3"),
+            ("proximity to South H2 corridor", "Yes / No  (Yes -> bonus +3)"),
+            ("IED (yes/no)", "Yes / No  (Yes -> bonus +2)"),
+            ("energy consumption [MWh]", "Number (optional)"),
+            ("process", "Free text: words like 'DRI', 'furnace', 'melting' help classification"),
+            ("notes", "Free text. In this template it shows the expected verdict of each example row"),
+        ],
+        "head2": ["Verdict", "Meaning"],
+        "rows2": [
+            ("🟢 Absolutely necessary", "H2 as feedstock / reducing agent (2015, 2014, 1920, 2410+DRI)"),
+            ("🟢 Necessary (physical limits)", "Large glass melting furnaces (2311, 2313)"),
+            ("🟡 Optional", "Cement/lime/refractories/bricks (2351, 2352, 2320, 2332)"),
+            ("🟠 Electrification alert", "Heat treatments and metallurgy (2431, 2550, 2561, 2562, prefix 24)"),
+            ("🔴 Thermodynamic waste", "Steam/energy, construction, data centers, by-product H2 (35, 38, 41-43, 63, 2011, 2013, 1910)"),
+        ],
+    },
+    "sl": {
+        "head": ["Stolpec", "Dovoljene vrednosti / Opombe"],
+        "rows": [
+            ("ime podjetja", "Prosto besedilo (obvezno)"),
+            ("koda", "Koda ATECO/NACE/SKD. Orodje prebere le prve 4 števke (npr. 24.100 -> 2410). Obvezno."),
+            ("velikost", "Mala / Srednja / Velika  (množitelj ×1,0 / ×1,2 / ×1,5). Obvezno."),
+            ("promet [M€]", "Število (neobvezno)"),
+            ("zaposleni", "Število (neobvezno)"),
+            ("lokacija/konzorcij", "Če vsebuje 'Z.I.' ali = Da -> bonus +3"),
+            ("bližina South H2 corridor", "Da / Ne  (Da -> bonus +3)"),
+            ("IED (da/ne)", "Da / Ne  (Da -> bonus +2)"),
+            ("poraba energije [MWh]", "Število (neobvezno)"),
+            ("proces", "Prosto besedilo: besede kot 'DRI', 'peč', 'litje' pomagajo pri razvrstitvi"),
+            ("opombe", "Prosto besedilo. V tej predlogi prikazuje pričakovano oceno vsake vrstice"),
+        ],
+        "head2": ["Ocena", "Pomen"],
+        "rows2": [
+            ("🟢 Nujno potrebno", "H2 kot surovina / reducent (2015, 2014, 1920, 2410+DRI)"),
+            ("🟢 Potrebno (fizične omejitve)", "Velike talilne peči za steklo (2311, 2313)"),
+            ("🟡 Neobvezno", "Cement/apno/ognjevzdržni izdelki/opeka (2351, 2352, 2320, 2332)"),
+            ("🟠 Opozorilo o elektrifikaciji", "Toplotne obdelave in metalurgija (2431, 2550, 2561, 2562, predpona 24)"),
+            ("🔴 Termodinamični odpadek", "Para/energija, gradbeništvo, podatkovni centri, odpadni H2 (35, 38, 41-43, 63, 2011, 2013, 1910)"),
+        ],
+    },
+}
+
+
+def _build_workbook(cols, data_rows, lang, dropdown_map):
+    """Costruisce un workbook formattato con header, bordi, dropdown e foglio Legenda."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Template"
+
+    header_fill = PatternFill("solid", fgColor="1F4E79")
+    header_font = Font(name="Arial", bold=True, color="FFFFFF", size=11)
+    body_font = Font(name="Arial", size=10)
+    note_font = Font(name="Arial", size=10, italic=True, color="7F7F7F")
+    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+    thin = Side(style="thin", color="D9D9D9")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    ws.append(cols)
+    for c in range(1, len(cols) + 1):
+        cell = ws.cell(row=1, column=c)
+        cell.fill, cell.font, cell.alignment, cell.border = header_fill, header_font, center, border
+    ws.row_dimensions[1].height = 32
+
+    text_left_cols = {1, 6, 10}   # nome, ubicazione, processo
+    note_col = len(cols)          # ultima colonna = note
+    for r_idx, row in enumerate(data_rows, start=2):
+        ws.append(row)
+        for c_idx in range(1, len(cols) + 1):
+            cell = ws.cell(row=r_idx, column=c_idx)
+            cell.border = border
+            if c_idx == note_col:
+                cell.alignment, cell.font = left, note_font
+            elif c_idx in text_left_cols:
+                cell.alignment, cell.font = left, body_font
+            else:
+                cell.alignment, cell.font = center, body_font
+
+    widths = [26, 13, 12, 13, 11, 20, 18, 12, 16, 32, 32]
+    for i in range(1, len(cols) + 1):
+        ws.column_dimensions[get_column_letter(i)].width = widths[i - 1] if i - 1 < len(widths) else 16
+    for r in range(2, len(data_rows) + 2):
+        for col in (4, 5, 9):
+            ws.cell(row=r, column=col).number_format = '#,##0'
+    ws.freeze_panes = "A2"
+
+    # Menu a tendina
+    last = len(data_rows) + 1
+    for col_idx, values in dropdown_map.items():
+        dv = DataValidation(type="list", formula1='"' + ",".join(values) + '"', allow_blank=True)
+        ws.add_data_validation(dv)
+        letter = get_column_letter(col_idx)
+        dv.add(f"{letter}2:{letter}{last}")
+
+    # Foglio Legenda
+    leg = LEGEND[lang]
+    ws2 = wb.create_sheet("Legenda")
+    ws2.append(leg["head"])
+    for name, desc in leg["rows"]:
+        ws2.append([name, desc])
+    ws2.append(["", ""])
+    sep_row = ws2.max_row + 1
+    ws2.append(leg["head2"])
+    for name, desc in leg["rows2"]:
+        ws2.append([name, desc])
+    for c in (1, 2):
+        for hr in (1, sep_row):
+            ws2.cell(row=hr, column=c).fill = header_fill
+            ws2.cell(row=hr, column=c).font = header_font
+    ws2.column_dimensions["A"].width = 32
+    ws2.column_dimensions["B"].width = 85
+    for r in range(1, ws2.max_row + 1):
+        ws2.cell(row=r, column=2).alignment = Alignment(wrap_text=True, vertical="center")
+        if ws2.cell(row=r, column=2).font.color is None or ws2.cell(row=r, column=2).font.b is not True:
+            ws2.cell(row=r, column=2).font = Font(name="Arial", size=10)
+
     output = BytesIO()
-    cols = T[lang]["cols_fase1"]
-    # Riga di esempio: il 2o valore è il codice (ATECO/NACE/SKD).
-    # Uso 24.10 (acciaio) come esempio: identico nei 3 sistemi fino alla 4a cifra.
-    example = ["Esempio Spa", "24.10", "Grande", 100, 200, "Z.I.", "Sì", "Sì", 50000, "Ciclo DRI", "RED III"]
-    df_temp = pd.DataFrame([example], columns=cols)
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df_temp.to_excel(writer, index=False)
+    wb.save(output)
     return output.getvalue()
 
+
+def generate_template_fase1(lang):
+    cols = T[lang]["cols_fase1"]
+    data_rows = []
+    for name, code, size, turn, emp, loc, south, aia, energy, rid in EXAMPLE_ROWS:
+        data_rows.append([
+            name, code, SIZE_LABEL[lang][size], turn, emp, loc,
+            YESNO[lang][south], YESNO[lang][aia], energy,
+            PROC_TEXT[rid][lang], NOTE_TEXT[rid][lang],
+        ])
+    # Dropdown: col 3 dimensione, col 7 South corridor, col 8 AIA/IED
+    dd = {
+        3: list(SIZE_LABEL[lang].values()),
+        7: [YESNO[lang][True], YESNO[lang][False]],
+        8: [YESNO[lang][True], YESNO[lang][False]],
+    }
+    return _build_workbook(cols, data_rows, lang, dd)
+
+
 def generate_template_fase2(lang):
-    output = BytesIO()
     cols = T[lang]["cols_fase2"]
-    example = ["Esempio Spa", "Grande", "24.10", 1500.0]
-    df_temp = pd.DataFrame([example], columns=cols)
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+    # 3 esempi idonei coerenti con la Fase 1
+    f2 = [
+        ("Ferriere Isontine S.p.A.", "L", "24.10.00", 1800.0),
+        ("NitroFert FVG S.r.l.", "L", "20.15", 2500.0),
+        ("Vetreria Giuliana S.r.l.", "L", "23.11", 600.0),
+    ]
+    output = BytesIO()
+    rows = [[n, SIZE_LABEL[lang][s], c, v] for n, s, c, v in f2]
+    df_temp = pd.DataFrame(rows, columns=cols)
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df_temp.to_excel(writer, index=False)
     return output.getvalue()
 
