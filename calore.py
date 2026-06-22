@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import os
 
 # ==========================================================================
@@ -30,7 +29,7 @@ T = {
         "lifetime_help": "Per quanti anni l'impianto resterà in funzione. Si usa per distribuire il costo d'acquisto e le emissioni di costruzione.",
         "cop": "Resa della pompa di calore (COP)",
         "cop_help": "Quante unità di calore produce la pompa per ogni unità di elettricità. 3 significa 3 volte più efficiente di una stufa elettrica.",
-        "takeaway": "In questo scenario, la soluzione **più economica** è {cheap} (circa {cheap_v} €/anno) e quella **più pulita** è {clean} (circa {clean_v} kg CO₂/anno).",
+        "takeaway": "In questo scenario, la soluzione <b>più economica</b> è {cheap} (circa {cheap_v} €/anno) e quella <b>più pulita</b> è {clean} (circa {clean_v} kg CO₂/anno).",
         "sort_label": "Ordina le soluzioni per:",
         "sort_cost": "💶 Costo", "sort_co2": "🌱 Emissioni", "sort_eff": "⚡ Efficienza",
         "m_cost": "Costo annuo", "u_cost": "€/anno",
@@ -45,7 +44,7 @@ T = {
         "leg_wtt": "Filiera (WtT)", "leg_ttw": "Camino (TtW)", "leg_constr": "Costruzione (divisa per gli anni)",
         "table": "📋 Tabella dati completa",
         "c_tech": "Soluzione", "c_prim": "Energia primaria", "c_eff": "η / COP", "c_em": "CO₂/anno", "c_cost": "Costo/anno",
-        "note": "💡 La lunghezza delle barre indica la grandezza relativa; il **colore** dice se è un bene (verde) o un problema (rosso). Per costo, emissioni ed energia: più corto è meglio. Per l'efficienza: più lungo è meglio.",
+        "note": "💡 La lunghezza delle barre indica la grandezza relativa; il <b>colore</b> dice se è un bene (verde) o un problema (rosso). Per costo, emissioni ed energia: più corto è meglio. Per l'efficienza: più lungo è meglio.",
         "names": {"boiler_oil": "Caldaia a gasolio", "boiler_gas": "Caldaia a metano", "stove_pellet": "Stufa a pellet",
                   "heat_pump": "Pompa di calore", "boiler_h2": "Caldaia a idrogeno"},
         "vectors": {"oil": "Gasolio", "ch4": "Metano", "pellet": "Pellet", "elc_grid": "Elettricità di rete",
@@ -66,7 +65,7 @@ T = {
         "lifetime_help": "How many years the system will run. Used to spread the purchase cost and construction emissions.",
         "cop": "Heat pump performance (COP)",
         "cop_help": "How many units of heat the pump produces per unit of electricity. 3 means 3× more efficient than an electric heater.",
-        "takeaway": "In this scenario, the **cheapest** option is {cheap} (about {cheap_v} €/yr) and the **cleanest** is {clean} (about {clean_v} kg CO₂/yr).",
+        "takeaway": "In this scenario, the <b>cheapest</b> option is {cheap} (about {cheap_v} €/yr) and the <b>cleanest</b> is {clean} (about {clean_v} kg CO₂/yr).",
         "sort_label": "Sort the options by:",
         "sort_cost": "💶 Cost", "sort_co2": "🌱 Emissions", "sort_eff": "⚡ Efficiency",
         "m_cost": "Annual cost", "u_cost": "€/yr",
@@ -81,7 +80,7 @@ T = {
         "leg_wtt": "Supply chain (WtT)", "leg_ttw": "Stack (TtW)", "leg_constr": "Construction (spread over years)",
         "table": "📋 Full data table",
         "c_tech": "Option", "c_prim": "Primary energy", "c_eff": "η / COP", "c_em": "CO₂/yr", "c_cost": "Cost/yr",
-        "note": "💡 Bar length shows the relative size; the **colour** tells whether it's good (green) or a problem (red). For cost, emissions and energy: shorter is better. For efficiency: longer is better.",
+        "note": "💡 Bar length shows the relative size; the <b>colour</b> tells whether it's good (green) or a problem (red). For cost, emissions and energy: shorter is better. For efficiency: longer is better.",
         "names": {"boiler_oil": "Oil boiler", "boiler_gas": "Gas boiler", "stove_pellet": "Pellet stove",
                   "heat_pump": "Heat pump", "boiler_h2": "Hydrogen boiler"},
         "vectors": {"oil": "Oil", "ch4": "Gas", "pellet": "Pellet", "elc_grid": "Grid electricity",
@@ -102,7 +101,7 @@ T = {
         "lifetime_help": "Koliko let bo sistem deloval. Uporablja se za porazdelitev nabavne cene in emisij izdelave.",
         "cop": "Učinkovitost toplotne črpalke (COP)",
         "cop_help": "Koliko enot toplote črpalka proizvede na enoto elektrike. 3 pomeni 3× bolj učinkovito od električnega grelnika.",
-        "takeaway": "V tem scenariju je **najcenejša** rešitev {cheap} (približno {cheap_v} €/leto), **najčistejša** pa {clean} (približno {clean_v} kg CO₂/leto).",
+        "takeaway": "V tem scenariju je <b>najcenejša</b> rešitev {cheap} (približno {cheap_v} €/leto), <b>najčistejša</b> pa {clean} (približno {clean_v} kg CO₂/leto).",
         "sort_label": "Razvrsti rešitve po:",
         "sort_cost": "💶 Strošek", "sort_co2": "🌱 Emisije", "sort_eff": "⚡ Učinkovitost",
         "m_cost": "Letni strošek", "u_cost": "€/leto",
@@ -117,7 +116,7 @@ T = {
         "leg_wtt": "Dobavna veriga (WtT)", "leg_ttw": "Dimnik (TtW)", "leg_constr": "Izdelava (porazdeljena na leta)",
         "table": "📋 Celotna tabela podatkov",
         "c_tech": "Rešitev", "c_prim": "Primarna energija", "c_eff": "η / COP", "c_em": "CO₂/leto", "c_cost": "Strošek/leto",
-        "note": "💡 Dolžina stolpcev prikazuje relativno velikost; **barva** pove, ali je dobro (zeleno) ali težava (rdeče). Za strošek, emisije in energijo: krajše je bolje. Za učinkovitost: daljše je bolje.",
+        "note": "💡 Dolžina stolpcev prikazuje relativno velikost; <b>barva</b> pove, ali je dobro (zeleno) ali težava (rdeče). Za strošek, emisije in energijo: krajše je bolje. Za učinkovitost: daljše je bolje.",
         "names": {"boiler_oil": "Oljni kotel", "boiler_gas": "Plinski kotel", "stove_pellet": "Peletna peč",
                   "heat_pump": "Toplotna črpalka", "boiler_h2": "Vodikov kotel"},
         "vectors": {"oil": "Olje", "ch4": "Plin", "pellet": "Pelet", "elc_grid": "Omrežna elektrika",
@@ -193,6 +192,19 @@ CSS = """
 .h4m-bar { height:7px; border-radius:5px; background:#EFF2F5; overflow:hidden; }
 .h4m-fill { height:100%; border-radius:5px; }
 @media (max-width:560px){ .h4c-metrics{ grid-template-columns:1fr; } }
+.h4-bd-title { font-weight:700; color:#1A2430; font-size:0.98rem; margin:16px 0 8px 0; }
+.h4-leg { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:12px; }
+.h4-leg span { display:flex; align-items:center; gap:6px; font-size:.78rem; color:#3C4A57; }
+.h4-leg i { width:12px; height:12px; border-radius:3px; display:inline-block; }
+.h4b-row { display:grid; grid-template-columns:215px 1fr 118px; align-items:center; gap:12px; margin-bottom:9px; }
+.h4b-label { font-size:.83rem; color:#1F2A35; font-weight:600; text-align:right; line-height:1.2; }
+.h4b-track { display:flex; height:24px; border-radius:6px; overflow:hidden; background:#EDF0F3; border:1px solid #E2E7EB; }
+.h4b-seg { height:100%; display:flex; align-items:center; justify-content:center; color:#fff;
+           font-size:.69rem; font-weight:700; font-family:'Space Grotesk',sans-serif; white-space:nowrap; overflow:hidden;
+           text-shadow:0 1px 1px rgba(0,0,0,.25); }
+.h4b-total { font-family:'Space Grotesk',sans-serif; font-weight:700; color:#11202E; font-size:.95rem; }
+.h4b-total small { color:#9AA6B2; font-weight:500; font-size:.66rem; }
+@media (max-width:560px){ .h4b-row{ grid-template-columns:120px 1fr 84px; } }
 </style>
 """
 
@@ -330,34 +342,48 @@ for i, r in df_sorted.iterrows():
 st.markdown(f"<div class='h4-grid'>{cards}</div>", unsafe_allow_html=True)
 
 # ==========================================================================
-# 9. GRAFICI DI DETTAGLIO (composizione)
+# 9. DETTAGLIO COMPOSIZIONE (barre impilate HTML ad alto contrasto)
 # ==========================================================================
 df["Label"] = df["Nome"] + " · " + df["Vettore"]
-ordine = df.sort_values("Costo")["Label"].tolist()[::-1]
-plot_font = dict(family="Inter, system-ui, sans-serif", size=13, color="#33404D")
+
+def render_breakdown(data, segments, unit, sort_col):
+    """data: DataFrame; segments: list of (col, label, color); unit: str."""
+    dd = data.sort_values(sort_col, ascending=False)
+    totals = dd[[s[0] for s in segments]].sum(axis=1)
+    max_total = totals.max() if totals.max() > 0 else 1.0
+
+    legend = "<div class='h4-leg'>" + "".join(
+        f"<span><i style='background:{c}'></i>{lbl}</span>" for _, lbl, c in segments) + "</div>"
+
+    rows = ""
+    for idx, r in dd.iterrows():
+        total = sum(r[s[0]] for s in segments)
+        segs = ""
+        for col, lbl, color in segments:
+            val = r[col]
+            if val <= 0:
+                continue
+            w_track = val / max_total * 100          # larghezza rispetto al massimo
+            w_in = val / total * 100 if total > 0 else 0  # quota dentro la barra
+            txt = fmt(val) if w_in > 11 else ""
+            segs += f"<div class='h4b-seg' style='width:{w_track:.2f}%;background:{color}'>{txt}</div>"
+        rows += (
+            f"<div class='h4b-row'>"
+            f"<div class='h4b-label'>{r['icon']} {r['Label']}</div>"
+            f"<div class='h4b-track'>{segs}</div>"
+            f"<div class='h4b-total'>{fmt(total)} <small>{unit}</small></div>"
+            f"</div>"
+        )
+    return legend + rows
 
 with st.expander(_t["detail"], expanded=True):
-    st.markdown(f"**{_t['chart_cost']}**")
-    dfc = df.melt(id_vars="Label", value_vars=["CAPEx", "Maint", "Fuel"], var_name="V", value_name="Eur")
-    dfc["V"] = dfc["V"].replace({"CAPEx": _t["leg_capex"], "Maint": _t["leg_maint"], "Fuel": _t["leg_fuel"]})
-    f_cost = px.bar(dfc, y="Label", x="Eur", color="V", orientation="h", barmode="stack",
-                    category_orders={"Label": ordine},
-                    color_discrete_map={_t["leg_capex"]: "#1C7C8C", _t["leg_maint"]: "#C98A1B", _t["leg_fuel"]: "#A33B4A"})
-    f_cost.update_yaxes(title_text=""); f_cost.update_xaxes(title_text="")
-    f_cost.update_layout(height=430, font=plot_font, plot_bgcolor="#fff", paper_bgcolor="#fff",
-                         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5, title_text=""))
-    st.plotly_chart(f_cost, use_container_width=True)
+    st.markdown(f"<div class='h4-bd-title'>{_t['chart_cost']}</div>", unsafe_allow_html=True)
+    cost_segments = [("CAPEx", _t["leg_capex"], "#0E6E7E"), ("Maint", _t["leg_maint"], "#C58A1A"), ("Fuel", _t["leg_fuel"], "#A33B4A")]
+    st.markdown(render_breakdown(df, cost_segments, _t["u_cost"], "Costo"), unsafe_allow_html=True)
 
-    st.markdown(f"**{_t['chart_em']}**")
-    dfe = df.melt(id_vars="Label", value_vars=["WtT", "TtW", "Costruz"], var_name="F", value_name="E")
-    dfe["F"] = dfe["F"].replace({"WtT": _t["leg_wtt"], "TtW": _t["leg_ttw"], "Costruz": _t["leg_constr"]})
-    f_em = px.bar(dfe, y="Label", x="E", color="F", orientation="h", barmode="stack",
-                  category_orders={"Label": ordine},
-                  color_discrete_map={_t["leg_wtt"]: "#8595A4", _t["leg_ttw"]: "#D4622A", _t["leg_constr"]: "#C2CAD2"})
-    f_em.update_yaxes(title_text=""); f_em.update_xaxes(title_text="")
-    f_em.update_layout(height=430, font=plot_font, plot_bgcolor="#fff", paper_bgcolor="#fff",
-                       legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5, title_text=""))
-    st.plotly_chart(f_em, use_container_width=True)
+    st.markdown(f"<div class='h4-bd-title'>{_t['chart_em']}</div>", unsafe_allow_html=True)
+    em_segments = [("WtT", _t["leg_wtt"], "#46586B"), ("TtW", _t["leg_ttw"], "#C2521E"), ("Costruz", _t["leg_constr"], "#8A94A0")]
+    st.markdown(render_breakdown(df, em_segments, _t["u_co2"], "Emiss"), unsafe_allow_html=True)
 
 # ==========================================================================
 # 10. TABELLA DATI
