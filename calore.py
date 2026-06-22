@@ -171,39 +171,43 @@ DEFAULT_FABBISOGNO, DEFAULT_LIFETIME, DEFAULT_COP = 10000, 20, 3.0
 CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
-.h4-sub { color:#5A6B7B; font-size:0.96rem; margin:-4px 0 2px 0; }
-.h4-take { display:flex; flex-wrap:wrap; gap:14px; background:#F4F8F6; border:1px solid #D9E7E0;
-           border-left:6px solid #0B6E4F; border-radius:12px; padding:14px 18px; margin:14px 0 6px 0; font-size:0.98rem; color:#23303B; }
-.h4-note { color:#7A8794; font-size:0.8rem; margin:10px 0 2px 0; }
+/* Testi: ereditano il colore del tema Streamlit (nero su chiaro, bianco su scuro) */
+.h4-sub { color:var(--text-color,#5A6B7B); opacity:.7; font-size:0.96rem; margin:-4px 0 2px 0; }
+.h4-take { display:flex; flex-wrap:wrap; gap:14px; background:rgba(11,110,79,.12);
+           border:1px solid rgba(11,110,79,.35); border-left:6px solid #0B6E4F; border-radius:12px;
+           padding:14px 18px; margin:14px 0 6px 0; font-size:0.98rem; color:var(--text-color,#23303B); }
+.h4-note { color:var(--text-color,#7A8794); opacity:.65; font-size:0.8rem; margin:10px 0 2px 0; }
 .h4-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:14px; margin-top:8px; }
-.h4c { background:#fff; border:1px solid #E6E9ED; border-left-width:6px; border-radius:13px; padding:15px 17px 14px 17px;
-       box-shadow:0 1px 2px rgba(16,24,40,.05); }
+.h4c { background:var(--secondary-background-color,#fff); border:1px solid rgba(127,127,127,.22);
+       border-left-width:6px; border-radius:13px; padding:15px 17px 14px 17px; box-shadow:0 1px 2px rgba(0,0,0,.08); }
 .h4c-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:12px; }
-.h4c-name { font-weight:700; font-size:1.04rem; color:#1A2430; line-height:1.2; }
+.h4c-name { font-weight:700; font-size:1.04rem; color:var(--text-color,#1A2430); line-height:1.2; }
 .h4c-name .ic { margin-right:6px; }
 .h4c-tags { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex:0 0 auto; }
-.h4c-vchip { font-size:.7rem; color:#46566A; background:#EEF2F5; border:1px solid #E2E7EB; border-radius:6px; padding:2px 8px; white-space:nowrap; }
+.h4c-vchip { font-size:.7rem; color:var(--text-color,#46566A); background:rgba(127,127,127,.14);
+             border:1px solid rgba(127,127,127,.28); border-radius:6px; padding:2px 8px; white-space:nowrap; }
 .h4c-badge { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:.04em; text-transform:uppercase;
              color:#fff; padding:3px 8px; border-radius:6px; white-space:nowrap; }
 .h4c-metrics { display:grid; grid-template-columns:1fr 1fr; gap:11px 16px; }
 .h4m-head { display:flex; justify-content:space-between; align-items:baseline; gap:6px; margin-bottom:4px; }
-.h4m-lbl { font-size:.72rem; color:#8595A4; text-transform:uppercase; letter-spacing:.03em; }
+.h4m-lbl { font-size:.72rem; color:var(--text-color,#8595A4); opacity:.6; text-transform:uppercase; letter-spacing:.03em; }
 .h4m-val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.0rem; }
-.h4m-bar { height:7px; border-radius:5px; background:#EFF2F5; overflow:hidden; }
+.h4m-bar { height:7px; border-radius:5px; background:rgba(127,127,127,.18); overflow:hidden; }
 .h4m-fill { height:100%; border-radius:5px; }
 @media (max-width:560px){ .h4c-metrics{ grid-template-columns:1fr; } }
-.h4-bd-title { font-weight:700; color:#1A2430; font-size:0.98rem; margin:16px 0 8px 0; }
+.h4-bd-title { font-weight:700; color:var(--text-color,#1A2430); font-size:0.98rem; margin:16px 0 8px 0; }
 .h4-leg { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:12px; }
-.h4-leg span { display:flex; align-items:center; gap:6px; font-size:.78rem; color:#3C4A57; }
+.h4-leg span { display:flex; align-items:center; gap:6px; font-size:.78rem; color:var(--text-color,#3C4A57); opacity:.85; }
 .h4-leg i { width:12px; height:12px; border-radius:3px; display:inline-block; }
 .h4b-row { display:grid; grid-template-columns:215px 1fr 118px; align-items:center; gap:12px; margin-bottom:9px; }
-.h4b-label { font-size:.83rem; color:#1F2A35; font-weight:600; text-align:right; line-height:1.2; }
-.h4b-track { display:flex; height:24px; border-radius:6px; overflow:hidden; background:#EDF0F3; border:1px solid #E2E7EB; }
+.h4b-label { font-size:.83rem; color:var(--text-color,#1F2A35); font-weight:600; text-align:right; line-height:1.2; }
+.h4b-track { display:flex; height:24px; border-radius:6px; overflow:hidden;
+             background:rgba(127,127,127,.16); border:1px solid rgba(127,127,127,.26); }
 .h4b-seg { height:100%; display:flex; align-items:center; justify-content:center; color:#fff;
            font-size:.69rem; font-weight:700; font-family:'Space Grotesk',sans-serif; white-space:nowrap; overflow:hidden;
-           text-shadow:0 1px 1px rgba(0,0,0,.25); }
-.h4b-total { font-family:'Space Grotesk',sans-serif; font-weight:700; color:#11202E; font-size:.95rem; }
-.h4b-total small { color:#9AA6B2; font-weight:500; font-size:.66rem; }
+           text-shadow:0 1px 1px rgba(0,0,0,.35); }
+.h4b-total { font-family:'Space Grotesk',sans-serif; font-weight:700; color:var(--text-color,#11202E); font-size:.95rem; }
+.h4b-total small { color:var(--text-color,#9AA6B2); opacity:.6; font-weight:500; font-size:.66rem; }
 @media (max-width:560px){ .h4b-row{ grid-template-columns:120px 1fr 84px; } }
 </style>
 """
@@ -253,7 +257,7 @@ df = pd.DataFrame([calcola(t) for t in TECHNOLOGIES])
 # ==========================================================================
 def lerp(frac):
     frac = max(0.0, min(1.0, frac))
-    stops = [(11, 110, 79), (28, 124, 140), (201, 138, 27), (212, 98, 43), (163, 59, 74)]
+    stops = [(13, 124, 92), (28, 124, 140), (201, 138, 27), (212, 98, 43), (163, 59, 74)]
     pos = frac * (len(stops) - 1)
     i = int(pos)
     if i >= len(stops) - 1:
